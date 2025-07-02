@@ -1,61 +1,8 @@
 # Data Analysis and Visualizations
 
-## Data sources
-
-CSV files
-
-Read and process CSV data
-
-Relational database
-
-Connect to relational database like PostgreSQL
-
-REST API
-
-Fetch data from REST APIs
-
-Excel files
-
-Handle Excel workbooks with multiple sheets
-
-
-## Data analysis tasks
-
-Data cleaning
-
-Handle missing values, duplicates, data type conversions
-
-Statistical analysis
-
-Calculate means, medians, standard deviations and for example hypothesis testing for significant differences and confidence intervals and statistical significance
-
-Conditional analysis
-
-Identify negative values, for example calculate percentage of entries below zero
-
-Data filtering
-
-Filter data based on specific conditions for example to identify outliers using statistical methods
-
-Aggregations
-
-Group by operations and summary statistics for example to generate summary statistics by categories
-
-Time series analysis
-
-Date/time data handling and trends
-
 ## Leveraging Python, Pandas, NumPy, Dask, PySpark and Plotly with Tableau or Power BI for Data Visualization
 
-Tableau or Power BI
-
 You can integrate Python and the Plotly library with both Tableau and Power BI, allowing you to create custom visualizations and enhance data analysis capabilities.
-
-Dash
-
-As an alternative, consider using Plotly Dash, an open-source framework for building analytical web applications in Python.
-
-Dash allows you to create interactive dashboards with advanced features, including data manipulation using Python libraries.
 
 ### Tableau
 
@@ -79,24 +26,6 @@ You can embed Plotly visualizations in Tableau dashboards by the next steps:
 
 6. Adding the sheets to a dashboard and dragging a web page object to embed the URL.
 
-```
-
-# Custom functions for Tableau calculated fields
-def detect_outliers(data):
-    # Statistical outlier detection
-    pass
-
-def calculate_trend(values, dates):
-    # Time series trend analysis
-    pass
-
-```
-
-
-Tableau Data Connector (TDC)
-
-Custom data source connections and data publishing
-
 ### Power BI
 
 1. Python scripting
@@ -114,3 +43,8 @@ In the Python script editor, write code to create your Plotly visualization. Pow
 4. Export as an image
 
 Since Power BI's Python visuals don't natively support interactive Plotly charts, you'll need to save the Plotly visual as an image (e.g., using kaleido) and display the image within Power BI.
+
+
+
+
+
