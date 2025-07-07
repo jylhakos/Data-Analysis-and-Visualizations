@@ -1,4 +1,4 @@
-# IoT temperature analytics microservices provided by machine learning
+# Usage: IoT temperature analytics microservices provided by machine learning
 
 ## Overview
 
@@ -56,7 +56,7 @@ python test_platform.py
 | Grafana | http://localhost:3000 | Monitoring dashboard (admin/admin) |
 | Prometheus | http://localhost:9090 | Metrics collection |
 
-## API usage
+## RESTful API usage
 
 ### Temperature data submission
 ```bash

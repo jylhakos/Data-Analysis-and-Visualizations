@@ -1,6 +1,6 @@
-# IoT Temperature Analytics Platform with Spring Boot 3.x and Machine Learning
+# IoT temperature analytics microservices with Spring Boot 3.x provided by machine learning
 
-## Architecture Overview
+## Overview
 
 This project demonstrates a comprehensive IoT data processing and machine learning platform using:
 
@@ -15,8 +15,8 @@ This project demonstrates a comprehensive IoT data processing and machine learni
 
 ## Components
 
-### 1. Spring Boot Application (`kinesis-iot-processor`)
-- **Main Application**: `KinesisIotProcessorApplication.java`
+### 1. Spring Boot application (`kinesis-iot-processor`)
+- **Main application**: `KinesisIotProcessorApplication.java`
 - **Models**: Temperature data and forecast models
 - **Services**:
   - `KinesisProducerService`: Publishes data to Kinesis streams
@@ -26,9 +26,9 @@ This project demonstrates a comprehensive IoT data processing and machine learni
   - `SqsService`: Manages message queuing
   - `MLServiceClient`: Communicates with ML service
 - **Controllers**: REST APIs for data access and forecasting
-- **MQTT Integration**: Receives data from IoT sensors
+- **MQTT integration**: Receives data from IoT sensors
 
-### 2. Machine Learning Service (`ml-service/`)
+### 2. Machine learning service (`ml-service/`)
 - **FastAPI** application for temperature forecasting
 - **scikit-learn** Random Forest model for time series prediction
 - **Features**:
@@ -37,7 +37,7 @@ This project demonstrates a comprehensive IoT data processing and machine learni
   - Model training with historical data
   - RESTful API for predictions
 
-### 3. IoT Sensor Simulator (`sensor-simulator/`)
+### 3. IoT sensor simulator (`sensor-simulator/`)
 - Simulates multiple temperature sensors
 - Generates realistic temperature data with:
   - Daily and seasonal patterns
@@ -45,7 +45,7 @@ This project demonstrates a comprehensive IoT data processing and machine learni
   - Battery level simulation
   - MQTT publishing
 
-### 4. Infrastructure Components
+### 4. Infrastructure
 - **MQTT Broker**: Eclipse Mosquitto for IoT communication
 - **LocalStack**: Local AWS services simulation
 - **Monitoring**: Prometheus and Grafana
@@ -59,26 +59,26 @@ This project demonstrates a comprehensive IoT data processing and machine learni
 - Docker & Docker Compose
 - Python 3.9+ (for local ML service development)
 
-### 1. Build the Project
+### 1. Build the project
 ```bash
 chmod +x build.sh
 ./build.sh
 ```
 
-### 2. Start the Platform
+### 2. Start the microservices
 ```bash
 docker-compose up -d
 ```
 
-### 3. Verify Services
+### 3. Verify
 - **Spring Boot API**: http://localhost:8080/api/temperature/health
-- **ML Service**: http://localhost:8001/health
-- **Grafana Dashboard**: http://localhost:3000 (admin/admin)
+- **ML service**: http://localhost:8001/health
+- **Grafana dashboard**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
 
-## API Endpoints
+## RESTful API endpoints
 
-### Spring Boot Application (Port 8080)
+### Spring Boot application (Port 8080)
 - `GET /api/temperature/sensors` - List all sensors
 - `GET /api/temperature/latest/{sensorId}` - Latest temperature reading
 - `GET /api/temperature/history/{sensorId}` - Historical data
@@ -86,7 +86,7 @@ docker-compose up -d
 - `POST /api/temperature/data` - Submit temperature data
 - `GET /api/temperature/health` - Health check
 
-### ML Service (Port 8001)
+### ML service (Port 8001)
 - `GET /health` - Health check
 - `POST /api/temperature/analyze` - Analyze temperature data
 - `POST /api/forecast/temperature` - Generate forecast
@@ -96,7 +96,7 @@ docker-compose up -d
 
 ## Configuration
 
-### Spring Boot Configuration (`application.yml`)
+### Spring Boot configuration (`application.yml`)
 ```yaml
 spring:
   application:
@@ -121,14 +121,14 @@ mqtt:
     temperature: sensor/temperature/+
 ```
 
-### Environment Variables
+### Environment variables
 - `AWS_REGION`: AWS region (default: us-east-1)
 - `MQTT_BROKER_URL`: MQTT broker URL
 - `ML_SERVICE_URL`: ML service URL
 - `SENSOR_COUNT`: Number of simulated sensors
 - `INTERVAL_SECONDS`: Data publishing interval
 
-## Data Flow
+## Data flows
 
 1. **IoT Sensors** → MQTT → **Spring Boot MQTT Listener**
 2. **Spring Boot** → Amazon Kinesis → **KCL Consumer**
@@ -136,9 +136,9 @@ mqtt:
 4. **Temperature Data** → **ML Service** (analysis & forecasting)
 5. **Web Clients** → **REST API** → **Forecast Results**
 
-## Machine Learning Features
+## Machine learning features
 
-### Temperature Forecasting Model
+### Temperature forecasting Model
 - **Algorithm**: Random Forest Regressor
 - **Features**:
   - Time-based features (hour, day, month)
@@ -146,7 +146,7 @@ mqtt:
   - Rolling averages (3, 6, 12 hour windows)
   - Humidity data (when available)
 
-### Model Training
+### Model training
 - Automatic feature engineering
 - Cross-validation with train/test split
 - Model persistence with joblib
@@ -158,7 +158,7 @@ mqtt:
 - Confidence intervals
 - Uncertainty quantification
 
-## AWS Integration
+## AWS integration
 
 ### Amazon Kinesis
 - Real-time data streaming
@@ -175,9 +175,9 @@ mqtt:
 - Dead letter queues for error handling
 - Batch processing support
 
-## Production Deployment
+## Production
 
-### AWS ECS Deployment
+### AWS ECS deployment
 ```yaml
 # Task definition for Spring Boot service
 {
@@ -189,12 +189,12 @@ mqtt:
 }
 ```
 
-### Environment-Specific Configurations
+### Environment specific configurations
 - **Local**: H2 database, LocalStack
 - **Development**: PostgreSQL, AWS dev environment
 - **Production**: RDS, full AWS services
 
-## Monitoring and Observability
+## Monitoring and observability
 
 ### Metrics (Prometheus)
 - Application metrics
@@ -213,44 +213,44 @@ mqtt:
 
 ## Testing
 
-### Unit Tests
+### Unit tests
 ```bash
 mvn test
 ```
 
-### Integration Tests
+### Integration tests
 ```bash
 mvn verify
 ```
 
-### Load Testing
+### Load testing
 - JMeter scripts for API testing
 - MQTT load testing tools
 
 ## Development
 
-### Local Development Setup
+### Local development setup
 1. Start LocalStack for AWS services
 2. Start Mosquitto MQTT broker
 3. Run Spring Boot application
 4. Start ML service
 5. Run sensor simulator
 
-### Adding New Features
-1. **New Sensor Types**: Extend TemperatureData model
-2. **ML Models**: Add new algorithms in ML service
+### Adding new features
+1. **New sensor types**: Extend TemperatureData model
+2. **ML models**: Add new algorithms in ML service
 3. **APIs**: Create new REST controllers
 4. **Processors**: Implement new stream processors
 
 ## Troubleshooting
 
-### Common Issues
-1. **MQTT Connection**: Check broker URL and port
-2. **AWS Credentials**: Verify LocalStack or AWS setup
-3. **ML Service**: Check Python dependencies
+### Issues
+1. **MQTT connection**: Check broker URL and port
+2. **AWS credentials**: Verify LocalStack or AWS setup
+3. **ML service**: Check Python dependencies
 4. **Docker**: Ensure sufficient resources
 
-### Logs Location
+### Logs location
 - Spring Boot: `logs/kinesis-iot-processor.log`
 - Docker logs: `docker-compose logs [service-name]`
 
