@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project demonstrates a comprehensive IoT data processing and machine learning platform using:
+This project demonstrates the use of microservices for processing IoT data and integrating machine learning.
 
 - **Spring Boot 3.x** with Java 17 for microservices
 - **Amazon Kinesis** for real-time data streaming with KCL (Kinesis Client Library)
