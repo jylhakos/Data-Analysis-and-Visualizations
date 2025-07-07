@@ -1,0 +1,148 @@
+# Application Configuration
+spring:
+  application:
+    name: kinesis-iot-processor
+  profiles:
+    active: local
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        
+  # H2 Database (for local development)
+  h2:
+    console:
+      enabled: true
+      
+  # Cloud Stream Configuration
+  cloud:
+    stream:
+      bindings:
+        temperatureData-in-0:
+          destination: temperature-stream
+          content-type: application/json
+          group: temperature-processor-group
+        temperatureData-out-0:
+          destination: processed-temperature-stream
+          content-type: application/json
+      kinesis:
+        binder:
+          auto-create-stream: true
+          kinesis-consumer-properties:
+            startPosition: LATEST
+            checkpoint-interval: 5000
+          kinesis-producer-properties:
+            sync: false
+            
+# AWS Configuration
+aws:
+  region: us-east-1
+  kinesis:
+    stream:
+      name: temperature-stream
+      shard-count: 2
+  dynamodb:
+    table:
+      sensor-data: sensor-temperature-data
+      forecasts: temperature-forecasts
+  sqs:
+    queue:
+      ml-processing: ml-processing-queue
+      
+# MQTT Configuration
+mqtt:
+  broker:
+    url: tcp://localhost:1883
+    client-id: spring-boot-kinesis-client
+    username: 
+    password: 
+  topics:
+    temperature: sensor/temperature/+
+    
+# ML Service Configuration
+ml:
+  service:
+    base-url: http://localhost:8001
+    endpoints:
+      forecast: /forecast
+      train: /train
+      health: /health
+      
+# Server Configuration
+server:
+  port: 8080
+  
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      
+# Logging Configuration
+logging:
+  level:
+    com.iotanalytics: DEBUG
+    software.amazon.kinesis: INFO
+    org.springframework.cloud.stream: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/kinesis-iot-processor.log
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: production
+  datasource:
+    url: jdbc:postgresql://localhost:5432/iotanalytics
+    username: ${DB_USERNAME:iotuser}
+    password: ${DB_PASSWORD:iotpass}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+mqtt:
+  broker:
+    url: ${MQTT_BROKER_URL:tcp://mosquitto:1883}
+    username: ${MQTT_USERNAME:}
+    password: ${MQTT_PASSWORD:}
+
+ml:
+  service:
+    base-url: ${ML_SERVICE_URL:http://ml-service:8001}
+
+---
+# Docker Profile
+spring:
+  config:
+    activate:
+      on-profile: docker
+      
+aws:
+  region: ${AWS_REGION:us-east-1}
+  endpoint-override: ${AWS_ENDPOINT_OVERRIDE:}
+  
+mqtt:
+  broker:
+    url: ${MQTT_BROKER_URL:tcp://mosquitto:1883}
