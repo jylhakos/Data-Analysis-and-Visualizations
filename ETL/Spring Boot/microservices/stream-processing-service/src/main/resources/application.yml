@@ -1,0 +1,39 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: stream-processing-service
+
+# Flink Configuration
+flink:
+  parallelism: 1
+  checkpointing:
+    interval: 60000  # 1 minute
+  state:
+    backend: filesystem
+
+# AWS Configuration
+aws:
+  region: us-east-1
+  kinesis:
+    stream: weather-stream
+  msk:
+    cluster: weather-cluster
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.aws.etl: DEBUG
+    org.apache.flink: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

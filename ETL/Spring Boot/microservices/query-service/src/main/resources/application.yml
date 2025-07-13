@@ -1,0 +1,34 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: query-service
+
+# Athena Configuration (for production)
+athena:
+  database: weather_db
+  table: weather_measurements
+  workgroup: primary
+
+# AWS Configuration
+aws:
+  region: us-east-1
+  s3:
+    bucket: weather-data-lake
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.aws.etl: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

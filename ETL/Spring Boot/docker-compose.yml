@@ -1,0 +1,289 @@
+version: '3.8'
+
+services:
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: weather-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: weather-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9997:9997"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9997
+      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka -Dcom.sun.management.jmxremote.rmi.port=9997
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+  # MQTT Broker (Eclipse Mosquitto)
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0
+    hostname: mqtt-broker
+    container_name: weather-mqtt-broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mqtt-data:/mosquitto/data
+      - mqtt-logs:/mosquitto/log
+    restart: unless-stopped
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    hostname: redis
+    container_name: weather-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  # PostgreSQL for metadata
+  postgres:
+    image: postgres:15-alpine
+    hostname: postgres
+    container_name: weather-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: weather_etl
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  # MinIO (S3-compatible storage for local development)
+  minio:
+    image: minio/minio:latest
+    hostname: minio
+    container_name: weather-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+  # Data Ingestion Service
+  data-ingestion-service:
+    build:
+      context: .
+      dockerfile: microservices/data-ingestion-service/Dockerfile
+    hostname: data-ingestion-service
+    container_name: weather-data-ingestion
+    ports:
+      - "8081:8080"
+      - "8091:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      MQTT_BROKER_URL: tcp://mqtt-broker:1883
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_S3_ENDPOINT: http://minio:9000
+    depends_on:
+      - kafka
+      - mqtt-broker
+      - redis
+      - minio
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ETL Processing Service
+  etl-processing-service:
+    build:
+      context: .
+      dockerfile: microservices/etl-processing-service/Dockerfile
+    hostname: etl-processing-service
+    container_name: weather-etl-processing
+    ports:
+      - "8082:8080"
+      - "8092:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/weather_etl
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_S3_ENDPOINT: http://minio:9000
+    depends_on:
+      - kafka
+      - postgres
+      - minio
+    restart: unless-stopped
+
+  # Stream Processing Service
+  stream-processing-service:
+    build:
+      context: .
+      dockerfile: microservices/stream-processing-service/Dockerfile
+    hostname: stream-processing-service
+    container_name: weather-stream-processing
+    ports:
+      - "8083:8080"
+      - "8093:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      FLINK_JOBMANAGER_RPC_ADDRESS: flink-jobmanager
+    depends_on:
+      - kafka
+      - flink-jobmanager
+    restart: unless-stopped
+
+  # Query Service
+  query-service:
+    build:
+      context: .
+      dockerfile: microservices/query-service/Dockerfile
+    hostname: query-service
+    container_name: weather-query-service
+    ports:
+      - "8084:8080"
+      - "8094:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/weather_etl
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_S3_ENDPOINT: http://minio:9000
+    depends_on:
+      - postgres
+      - minio
+    restart: unless-stopped
+
+  # Dashboard API Service
+  dashboard-api-service:
+    build:
+      context: .
+      dockerfile: microservices/dashboard-api-service/Dockerfile
+    hostname: dashboard-api-service
+    container_name: weather-dashboard-api
+    ports:
+      - "8085:8080"
+      - "8095:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/weather_etl
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+      - query-service
+    restart: unless-stopped
+
+  # Apache Flink JobManager
+  flink-jobmanager:
+    image: flink:1.18-scala_2.12
+    hostname: flink-jobmanager
+    container_name: weather-flink-jobmanager
+    ports:
+      - "8086:8081"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        parallelism.default: 2
+    volumes:
+      - flink-data:/tmp
+
+  # Apache Flink TaskManager
+  flink-taskmanager:
+    image: flink:1.18-scala_2.12
+    hostname: flink-taskmanager
+    container_name: weather-flink-taskmanager
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    scale: 2
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 2
+        parallelism.default: 2
+    volumes:
+      - flink-data:/tmp
+
+  # React Dashboard
+  react-dashboard:
+    build:
+      context: frontend/dashboard
+      dockerfile: Dockerfile
+    hostname: react-dashboard
+    container_name: weather-react-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8085
+      REACT_APP_WS_URL: ws://localhost:8085/ws
+    depends_on:
+      - dashboard-api-service
+    restart: unless-stopped
+
+volumes:
+  zookeeper-data:
+  zookeeper-logs:
+  kafka-data:
+  mqtt-data:
+  mqtt-logs:
+  redis-data:
+  postgres-data:
+  minio-data:
+  flink-data:
+
+networks:
+  default:
+    name: weather-etl-network
+    driver: bridge

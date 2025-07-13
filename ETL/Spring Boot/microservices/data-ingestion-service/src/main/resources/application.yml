@@ -1,0 +1,38 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: data-ingestion-service
+  jackson:
+    default-property-inclusion: NON_NULL
+
+# MQTT Configuration
+mqtt:
+  broker:
+    url: tcp://localhost:1883
+  client:
+    id: weather-ingestion-service
+  topic:
+    weather: weather/measurements
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.aws.etl: DEBUG
+    org.eclipse.paho: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
