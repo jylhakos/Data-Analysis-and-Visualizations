@@ -27,7 +27,7 @@ This solution implements a scalable ETL pipeline processing temperature measurem
 - **Amazon API Gateway**: API management
 - **AWS CloudFormation/Terraform**: Infrastructure as Code
 
-![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/ETL/Spring Boot/DATA-FLOW.png?raw=true)
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/ETL/Spring%20Boot/DATA-FLOW.png?raw=true)
 
 ## Prerequisites
 
