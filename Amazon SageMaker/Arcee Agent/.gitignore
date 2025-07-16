@@ -169,3 +169,9 @@ test_reports/
 reports/
 *_report.html
 *_report.xml
+
+#AWS CLI ZIP
+
+awscliv2.zip
+
+
