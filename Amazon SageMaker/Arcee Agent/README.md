@@ -235,9 +235,9 @@ The model generates tool calls in JSON format:
 - Limit samples with `--max_samples` for testing
 - Use VLLM server for better performance with multiple requests
 
-## 🚀 Amazon AWS resource allocation and fine-tuning on Amazon SageMaker
+## Amazon AWS resource allocation and fine-tuning on Amazon SageMaker
 
-### 💻 Computing resources allocation
+### Computing resources allocation
 
 #### SageMaker instance types for Arcee Agent
 
