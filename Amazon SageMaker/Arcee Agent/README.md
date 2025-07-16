@@ -6,12 +6,12 @@ This project demonstrates how to use the Arcee Agent model to process datasets c
 
 ## Features
 
-- 🤖 **Function calls**: Implements function calling with the Arcee Agent model
-- 🛠️ **Tool processing**: Parses and processes tool definitions from datasets
-- 📊 **Dataset handling**: Loads and processes function calling datasets
-- 🔍 **Evaluation**: Evaluates model predictions against ground truth
-- 📁 **Local & API support**: Works with both local quantized models and API endpoints
-- ⚡ **vLLM integration**: Compatible with vLLM OpenAI compatible servers
+- **Function calls**: Implements function calling with the Arcee Agent model
+- **Tool processing**: Parses and processes tool definitions from datasets
+- **Dataset handling**: Loads and processes function calling datasets
+- **Evaluation**: Evaluates model predictions against ground truth
+- **Local & API support**: Works with both local quantized models and API endpoints
+- **vLLM integration**: Compatible with vLLM OpenAI compatible servers
 
 ## Project
 
@@ -276,7 +276,7 @@ The model generates tool calls in JSON format:
 2. **Production inference**: `ml.m5.large` or `ml.g4dn.xlarge` (depending on latency needs)
 3. **Fine-tuning**: `ml.g4dn.2xlarge` or `ml.p3.2xlarge` (faster training)
 
-### 🎯 Fine-tuning Arcee Agent with local dataset
+### Fine-tuning Arcee Agent with local dataset
 
 #### Prerequisites for fine-tuning
 
@@ -1193,7 +1193,7 @@ docker-compose up arcee-api
 # Documentation: http://localhost:8000/docs
 ```
 
-#### Testing the Deployment
+#### Testing the deployment
 
 ##### Health check
 
@@ -1618,18 +1618,18 @@ chmod +x scripts/setup_aws.sh
 
 The automated setup script performs the following:
 
-1. ✅ **Validates AWS credentials** and connectivity
-2. ✅ **Creates SageMaker execution role** with proper trust policies
-3. ✅ **Attaches all necessary AWS managed policies**:
+1. **Validates AWS credentials** and connectivity
+2. **Creates SageMaker execution role** with proper trust policies
+3. **Attaches all necessary AWS managed policies**:
    - AmazonSageMakerFullAccess
    - AmazonS3FullAccess
    - AmazonEC2ContainerRegistryFullAccess
    - CloudWatchLogsFullAccess
-4. ✅ **Creates custom enhanced policy** for advanced operations
-5. ✅ **Creates S3 bucket** for model artifacts with encryption
-6. ✅ **Creates ECR repository** for Docker images
-7. ✅ **Sets up environment variables** in ~/.bashrc
-8. ✅ **Verifies all permissions** and access
+4. **Creates custom enhanced policy** for advanced operations
+5. **Creates S3 bucket** for model artifacts with encryption
+6. **Creates ECR repository** for Docker images
+7. **Sets up environment variables** in ~/.bashrc
+8. **Verifies all permissions** and access
 
 ---
 
