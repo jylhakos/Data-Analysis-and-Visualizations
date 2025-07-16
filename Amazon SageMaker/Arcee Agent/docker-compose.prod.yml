@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+  # Main Arcee Agent API Service
+  arcee-agent-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: arcee-agent-api:latest
+    container_name: arcee-agent-production
+    ports:
+      - "8000:8000"
+    environment:
+      # Application Settings
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - WORKERS=4
+      
+      # AWS Configuration
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - SAGEMAKER_ENDPOINT_NAME=${SAGEMAKER_ENDPOINT_NAME}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      
+      # Model Configuration
+      - MODEL_NAME=${MODEL_NAME:-arcee-agent-finetuned}
+      - MAX_TOKENS=${MAX_TOKENS:-512}
+      - TEMPERATURE=${TEMPERATURE:-0.1}
+      - TOP_P=${TOP_P:-0.9}
+      
+      # Performance Settings
+      - MAX_CONCURRENT_REQUESTS=${MAX_CONCURRENT_REQUESTS:-100}
+      - REQUEST_TIMEOUT=${REQUEST_TIMEOUT:-30}
+      - CACHE_SIZE=${CACHE_SIZE:-1000}
+      
+    volumes:
+      # Mount logs directory for persistence
+      - ./logs:/home/arcee/app/logs
+      # Mount models directory if using local models
+      - ./models:/home/arcee/app/models:ro
+      # Mount config if needed
+      - ./config:/home/arcee/app/config:ro
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+    
+    networks:
+      - arcee-network
+    
+    # Dependency on database if using one
+    depends_on:
+      - redis-cache
+
+  # Redis for caching (optional but recommended for production)
+  redis-cache:
+    image: redis:7-alpine
+    container_name: arcee-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - arcee-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # Nginx reverse proxy (optional, for production with SSL)
+  nginx:
+    image: nginx:alpine
+    container_name: arcee-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - arcee-agent-api
+    restart: unless-stopped
+    networks:
+      - arcee-network
+
+  # Prometheus for monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: arcee-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - arcee-network
+
+  # Grafana for dashboards (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: arcee-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - arcee-network
+
+volumes:
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  arcee-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

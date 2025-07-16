@@ -1,0 +1,171 @@
+# Python
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.pyc
+*.pyo
+
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+.env/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+profile_default/
+ipython_config.py
+
+# Models and large files
+*.gguf
+*.ggml
+*.bin
+*.safetensors
+models/
+*.pt
+*.pth
+my_dataset/
+output_models/
+fine_tuned_models/
+
+# IDE
+.vscode/
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+*.sublime-*
+.atom/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and Test Reports
+*.log
+logs/
+log/
+**/*.log
+test_output/
+test_results/
+test-results/
+outputs/
+output/
+**/outputs/
+**/logs/
+coverage.xml
+htmlcov/
+.coverage
+.pytest_cache/
+.tox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Testing
+.pytest_cache/
+test_output/
+test-reports/
+testing_reports/
+*_test_report*
+*_testing_report*
+TESTING_STATUS_REPORT.md
+TEST_RESULTS.md
+
+# Config files with secrets
+*.env
+.env.local
+config.json
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+aws-credentials.json
+secrets.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# AWS and deployment specific
+.aws/
+*.pem
+*.key
+aws-credentials.json
+
+# Docker
+.dockerignore
+
+# Environment and configuration
+.env.local
+.env.production
+.env.development
+config.local.json
+
+# Additional Python cache and temp files
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Machine Learning specific
+wandb/
+mlruns/
+.neptune/
+tensorboard_logs/
+experiments/
+checkpoints/
+
+# SageMaker specific
+.sagemaker/
+sagemaker-*/
+sm-*/
+
+# Additional test and report files
+junit.xml
+test-reports/
+test_reports/
+*.html
+*.xml
+reports/
+*_report.html
+*_report.xml
