@@ -1,0 +1,236 @@
+# =============================================================================
+# PYTHON & JUPYTER
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.dll
+
+# Virtual environment folders
+env/
+venv/
+ENV/
+.venv/
+bin/
+lib/
+lib64/
+include/
+Scripts/
+pyvenv.cfg
+site-packages/
+
+# Jupyter Notebook checkpoints and outputs
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+.pynb_checkpoints/
+*.nbconvert.ipynb
+*.nbconvert/
+*.nbgrader/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# =============================================================================
+# AWS & CLOUD DEPLOYMENT (CRITICAL SECURITY)
+# =============================================================================
+
+# AWS Credentials (NEVER COMMIT THESE!)
+.aws/
+aws-credentials
+*.pem
+*.key
+*.ppk
+*_rsa
+*_rsa.pub
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+.ssh/
+
+# Terraform state files (SENSITIVE - contain infrastructure details)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+terraform.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# AWS CDK
+cdk.out/
+*.cdk.staging
+
+# CloudFormation templates (if containing secrets)
+cloudformation-template-*.json
+
+# Deployment logs (may contain sensitive info)
+aws-deployment/*.log
+deployment-*.log
+
+# =============================================================================
+# DATA FILES & DATASETS
+# =============================================================================
+
+# Large binary data files
+*.csv.bz2
+*.csv.gz
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.rar
+*.parquet
+
+# Large CSV data files (keep small samples)
+2008.csv
+2008.csv.bz2
+*_large.csv
+*_full.csv
+*_complete.csv
+
+# Binary data formats
+*.xlsx
+*.xls
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep small reference files but exclude large datasets
+2008_sample.csv
+2008_testsample*.csv
+# Keep: airports.csv, carriers.csv (small reference files < 1MB)
+
+# =============================================================================
+# DEVELOPMENT ENVIRONMENTS
+# =============================================================================
+
+# Virtual environments (local installations)
+jupyter/
+Mllib/
+etc/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =============================================================================
+# LOGS & TEMPORARY FILES
+# =============================================================================
+
+# Log files
+*.log
+*.log.*
+logs/
+log/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+.#*
+\#*#
+
+# Runtime files
+*.pid
+*.seed
+*.cover
+
+# =============================================================================
+# SPARK & BIG DATA
+# =============================================================================
+
+# Spark
+spark-warehouse/
+derby.log
+metastore_db/
+.sparkStaging/
+
+# Hadoop
+*.log4j.properties
+
+# =============================================================================
+# SECURITY & SENSITIVE FILES (CRITICAL)
+# =============================================================================
+
+# Environment variables (may contain secrets)
+.env
+.env.*
+!.env.example
+
+# Configuration files that might contain credentials
+config.ini
+config.yaml
+config.json
+settings.local.*
+secrets.*
+
+# Certificate files
+*.crt
+*.cert
+*.ca-bundle
+*.p7b
+*.p7s
+*.pfx
+
+# API keys and tokens
+*api-key*
+*token*
+*secret*
+*password*
+
+# =============================================================================
+# CI/CD & DEPLOYMENT
+# =============================================================================
+
+# GitHub Actions secrets
+.github/secrets/
+
+# Docker
+Dockerfile.local
+docker-compose.override.yml
+.dockerignore
+
+# =============================================================================
+# KEEP THESE IMPORTANT FILES
+# =============================================================================
+
+# Keep these small files (they're needed for the project):
+# !airports.csv
+# !carriers.csv
+# !README.md
+# !AirTrafficProcessor.ipynb
+# !quick_verify.py
+# !verify_pyspark_mllib.py
+# !test_notebook.sh
+# !aws-deployment/*.sh
+# !aws-deployment/terraform/*.tf
+# !aws-deployment/*.md
