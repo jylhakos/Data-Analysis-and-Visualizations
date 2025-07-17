@@ -4,7 +4,7 @@
 
 ### Deploy PySpark/MLlib Jupyter Notebook to Amazon AWS
 
-For production workloads, large-scale data processing, and collaborative development, deploy your PySpark MLlib Jupyter Notebook to Amazon AWS using multiple deployment options:
+For production workloads, large-scale data processing, and collaborative development, deploy your PySpark/MLlib Jupyter Notebook to Amazon AWS using multiple deployment options:
 
 #### Deployment
 
@@ -74,7 +74,7 @@ graph TB
         B --> C[Deployment Scripts]
     end
     
-    subgraph "AWS Cloud"
+    subgraph "Amazon AWS Cloud"
         C --> D[Terraform Infrastructure]
         D --> E[EMR Cluster]
         D --> F[SageMaker Instance]
@@ -237,7 +237,7 @@ graph TB
         C[Local Data]
     end
     
-    subgraph "AWS Cloud Infrastructure"
+    subgraph "Amazon AWS Cloud Infrastructure"
         D[S3 Bucket<br/>Data Storage]
         E[EMR Cluster<br/>Spark Processing]
         F[JupyterHub<br/>Web Interface]
