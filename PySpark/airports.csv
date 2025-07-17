@@ -1,0 +1,31 @@
+iata,airport,city,state,country,lat,long
+ATL,Hartsfield-Jackson Atlanta International,Atlanta,GA,USA,33.6407,-84.4277
+DFW,Dallas/Fort Worth International,Dallas,TX,USA,32.8998,-97.0403
+DEN,Denver International,Denver,CO,USA,39.8561,-104.6737
+ORD,O'Hare International,Chicago,IL,USA,41.9786,-87.9048
+LAX,Los Angeles International,Los Angeles,CA,USA,33.9425,-118.4081
+PHX,Phoenix Sky Harbor International,Phoenix,AZ,USA,33.4343,-112.0080
+LAS,McCarran International,Las Vegas,NV,USA,36.0840,-115.1537
+IAH,George Bush Intercontinental,Houston,TX,USA,29.9902,-95.3368
+MCO,Orlando International,Orlando,FL,USA,28.4292,-81.3089
+SEA,Seattle-Tacoma International,Seattle,WA,USA,47.4502,-122.3088
+MSP,Minneapolis-St Paul International,Minneapolis,MN,USA,44.8848,-93.2223
+DTW,Detroit Metropolitan Wayne County,Detroit,MI,USA,42.2162,-83.3554
+BOS,Logan International,Boston,MA,USA,42.3656,-71.0096
+LGA,LaGuardia,New York,NY,USA,40.7769,-73.8740
+JFK,John F Kennedy International,New York,NY,USA,40.6413,-73.7781
+SFO,San Francisco International,San Francisco,CA,USA,37.6213,-122.3790
+BWI,Baltimore/Washington International,Baltimore,MD,USA,39.1774,-76.6684
+MDW,Midway International,Chicago,IL,USA,41.7868,-87.7522
+PHL,Philadelphia International,Philadelphia,PA,USA,39.8744,-75.2424
+DCA,Ronald Reagan Washington National,Washington,DC,USA,38.8521,-77.0377
+MIA,Miami International,Miami,FL,USA,25.7959,-80.2870
+SLC,Salt Lake City International,Salt Lake City,UT,USA,40.7899,-111.9791
+TPA,Tampa International,Tampa,FL,USA,27.9834,-82.5330
+HOU,William P Hobby,Houston,TX,USA,29.6454,-95.2789
+STL,Lambert-St Louis International,St Louis,MO,USA,38.7487,-90.3700
+SAN,San Diego International,San Diego,CA,USA,32.7335,-117.1896
+HNL,Honolulu International,Honolulu,HI,USA,21.3099,-157.8581
+PDX,Portland International,Portland,OR,USA,45.5898,-122.5951
+EWR,Newark Liberty International,Newark,NJ,USA,40.6895,-74.1745
+CLE,Cleveland Hopkins International,Cleveland,OH,USA,41.4117,-81.8479
