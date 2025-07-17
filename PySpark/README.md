@@ -2,7 +2,7 @@
 
 PySpark is the Python API for Apache Spark.
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main//PySpark/PySpark.png?raw=true)
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/PySpark/PySpark.png?raw=true)
 
 This folder contains a Jupyter notebook (`AirTrafficProcessor.ipynb`) that demonstrates DataFrame exercises using Apache Spark to process and analyze air traffic data from 2008. The notebook includes various data analysis tasks using both Spark SQL and DataFrame API methods.
 
