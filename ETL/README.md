@@ -1,5 +1,9 @@
 # Extract, Transform, Load  (ETL)
 
+What is ETL (Extract Transform Load)?
+
+Extract, transform, and load (ETL) is the process of combining data from multiple sources into a repository called a data warehouse.
+
 Real-time processing of temperature data using ETL with MQTT, gRPC, AWS, and a React (Next.js) dashboard
 
 The sensor data flows through MQTT to Kafka, where dedicated ETL microservices process and store it using gRPC for efficient internal communication. 

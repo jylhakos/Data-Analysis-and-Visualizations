@@ -1,5 +1,67 @@
 # Data Analysis and Visualizations
 
+Data analysis is the process of gathering, cleaning, and modeling data to reveal insights.
+
+**Amazon Data Firehose**
+
+Amazon Data Firehose provides way to acquire, transform, and deliver data streams to data lakes, data warehouses and analytics services.
+
+**Amazon Kinesis**
+
+You can use Amazon Kinesis to collect and process streams of data in real time.
+
+**Amazon Redshift**
+
+Amazon Redshift integrates with Amazon SageMaker, allowing you to leverage its SQL analytics capabilities. 
+
+**Amazon SageMaker**
+
+Analyze, prepare, and integrate data for analytics and AI.
+
+**Apache Beam**
+
+Apache Beam is an open source for defining both batch and streaming data-parallel processing pipelines.
+
+You can use Apache Beam for Extract, Transform, and Load (ETL) tasks.
+
+**Apache Flink**
+
+Streaming Extract, Transform, and Load (ETL) with Apache Flink and Amazon Kinesis Data Analytics.
+
+Apache Flink is a distributed processing engine for stateful computations over unbounded and bounded data streams.
+
+**Apache Spark**
+
+Apache Spark is an open source distributed processing system used for big data workloads.
+
+**Google Cloud Dataflow**
+
+Dataflow is a streaming platform provided by Google Cloud.
+
+**Excel**
+
+In data analytics with Excel, insights refer to the conclusions and patterns discovered after analyzing data.
+
+**Apache Kafka**
+
+Apache Kafka is an open-source distributed event streaming platform. The event streaming is the practice of capturing data in real-time from event sources like databases, sensors or cloud services in the form of streams of events.
+
+**PySpark**
+
+PySpark is the Python API for Apache Spark and tool for data analytics.
+
+**Power BI**
+
+Power BI is Microsoft's analytics platform that helps you turn data into actionable insights.
+
+**Tableau**
+
+Tableau is a data visualization tool used to analyze and present data in a visually and interactive way.
+
+**Extract Transform and Load (ETL)**
+
+Extract, Transform, and Load (ETL) is the process of combining data from multiple sources into a large repository called a data warehouse.
+
 ## Data sources
 
 CSV files
