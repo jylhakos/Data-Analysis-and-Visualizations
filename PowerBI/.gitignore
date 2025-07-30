@@ -1,0 +1,29 @@
+# Python Virtual Environment files
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+
+# Python Virtual Environment - alternative names
+virtualenv/
+.virtualenv/
+pyenv/
+.pyenv/
+
+# Conda environments
+conda-meta/
+.conda/
+
+# pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Python environment variables
+.env
+.env.local
+.env.*.local

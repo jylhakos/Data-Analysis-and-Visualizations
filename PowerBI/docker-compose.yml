@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  fish-ml-app:
+    build: .
+    container_name: fish_weight_prediction
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./output:/app/output
+      - ./powerbi_output:/app/powerbi_output
+      - ./logs:/app/logs
+    ports:
+      - "8888:8888"  # Jupyter Notebook
+      - "8000:8000"  # FastAPI (if needed)
+      - "5000:5000"  # Flask (if needed)
+    environment:
+      - PYTHONPATH=/app
+    command: ["python", "scikit-learn/fish_predictive_model.py"]
+    
+  fish-jupyter:
+    build: .
+    container_name: fish_jupyter
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./output:/app/output
+      - ./notebooks:/app/notebooks
+    ports:
+      - "8889:8888"
+    environment:
+      - PYTHONPATH=/app
+    command: ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+    
+  fish-api:
+    build: .
+    container_name: fish_prediction_api
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONPATH=/app
+    command: ["uvicorn", "Apache Airflow/fish_api:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      - fish-ml-app

@@ -1,0 +1,16 @@
+Fish Weight Prediction Dataset - Basic Report
+==================================================
+
+Total Fish: 159
+Species Count: 7
+Average Weight: 398.33g
+Weight Range: 0.0g - 1650.0g
+
+Fish by Species:
+  Bream: 35 fish
+  Parkki: 11 fish
+  Perch: 56 fish
+  Pike: 17 fish
+  Roach: 20 fish
+  Smelt: 14 fish
+  Whitefish: 6 fish

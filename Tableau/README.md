@@ -26,23 +26,11 @@ You can embed Plotly visualizations in Tableau dashboards by the next steps:
 
 6. Adding the sheets to a dashboard and dragging a web page object to embed the URL.
 
-### Power BI
+### References
 
-1. Python scripting
+[Install and Configure Tableau Server](https://help.tableau.com/current/server-linux/en-us/install_config_top.htm)
 
-Enable Python scripting within Power BI Desktop to use Python visuals.
-
-2. Add Python visuals on Power BI
-
-Select the Python visual icon in Power BI's Visualizations pane and enable script visuals.
-
-3. Write Python script code
-
-In the Python script editor, write code to create your Plotly visualization. Power BI passes data to your script as a pandas DataFrame.
-
-4. Export as an image
-
-Since Power BI's Python visuals don't natively support interactive Plotly charts, you'll need to save the Plotly visual as an image (e.g., using kaleido) and display the image within Power BI.
+[Jump-start Installation](https://help.tableau.com/current/server-linux/en-us/jumpstart.htm)
 
 
 

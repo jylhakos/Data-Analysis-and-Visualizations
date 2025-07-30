@@ -1,0 +1,243 @@
+version: '3.8'
+
+# 🐟 Production Fish weight prediction stack
+# Deploys the most meaningful components for fish weight prediction business value
+
+services:
+  # 1. Fish Weight Prediction API - HIGH BUSINESS VALUE 💰
+  # Revenue-generating service for real-time fish weight predictions
+  fish-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.fish-api
+    container_name: fish_weight_api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_PATH=/models/fish_weight_model.pkl
+      - LOG_LEVEL=INFO
+      - API_TITLE=Fish Weight Prediction API
+    volumes:
+      - fish_models:/models:ro  # Read-only access to fish models
+      - fish_logs:/app/logs
+    depends_on:
+      - redis
+      - postgres
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - fish_network
+
+  # 2. Fish ML Pipeline (Apache Airflow) - OPERATIONAL VALUE 🔧
+  # Automated fish weight model training and retraining
+  airflow-webserver:
+    build: .
+    container_name: fish_airflow_webserver
+    command: >
+      bash -c "
+        airflow db upgrade &&
+        airflow users create --username admin --firstname Fish --lastname Admin --role Admin --email admin@fishprediction.com --password admin &&
+        airflow webserver --port 8080
+      "
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=redis://redis:6379/0
+      - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY=YourFernetKeyHere123456789012345678901234567890
+      - AIRFLOW__WEBSERVER__SECRET_KEY=YourSecretKeyHere123456789012345678901234567890
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=False
+      # Fish-specific configurations
+      - FISH_DATASET_PATH=/opt/airflow/Dataset/Fish.csv
+      - FISH_MODEL_OUTPUT_PATH=/opt/airflow/ml_models
+      - FISH_RETRAIN_THRESHOLD=0.1  # Retrain if MAPE > 10%
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./Dataset:/opt/airflow/Dataset:ro  # Fish.csv dataset
+      - fish_models:/opt/airflow/ml_models  # Shared fish models
+      - ./fish_supervised_pipeline.py:/opt/airflow/fish_supervised_pipeline.py
+      - ./fish_analysis.py:/opt/airflow/fish_analysis.py
+      - ./fish_regression.py:/opt/airflow/fish_regression.py
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - fish_network
+
+  # 3. Airflow Scheduler for Fish Pipeline
+  airflow-scheduler:
+    build: .
+    container_name: fish_airflow_scheduler
+    command: airflow scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=redis://redis:6379/0
+      - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY=YourFernetKeyHere123456789012345678901234567890
+      - AIRFLOW__WEBSERVER__SECRET_KEY=YourSecretKeyHere123456789012345678901234567890
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=False
+      # Fish-specific configurations
+      - FISH_DATASET_PATH=/opt/airflow/Dataset/Fish.csv
+      - FISH_MODEL_OUTPUT_PATH=/opt/airflow/ml_models
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./Dataset:/opt/airflow/Dataset:ro
+      - fish_models:/opt/airflow/ml_models
+      - ./fish_supervised_pipeline.py:/opt/airflow/fish_supervised_pipeline.py
+      - ./fish_analysis.py:/opt/airflow/fish_analysis.py
+      - ./fish_regression.py:/opt/airflow/fish_regression.py
+    restart: always
+    networks:
+      - fish_network
+
+  # 4. PostgreSQL - Fish Data and Metadata Storage 🗄️
+  postgres:
+    image: postgres:13
+    container_name: fish_postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+      # Additional fish-specific database
+      POSTGRES_MULTIPLE_DATABASES: airflow,fish_predictions
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-fish-db.sql:/docker-entrypoint-initdb.d/init-fish-db.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
+    networks:
+      - fish_network
+
+  # 5. Redis - Fish Prediction Job Queue 📬
+  redis:
+    image: redis:7-alpine
+    container_name: fish_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+    restart: always
+    networks:
+      - fish_network
+
+  # 6. Fish Model Trainer - Automated Retraining Service 🤖
+  fish-trainer:
+    build: .
+    container_name: fish_model_trainer
+    command: >
+      bash -c "
+        sleep 60 &&
+        python fish_supervised_pipeline.py
+      "
+    environment:
+      - FISH_DATASET_PATH=/data/Fish.csv
+      - MODEL_OUTPUT_PATH=/models
+      - TRAINING_SCHEDULE=daily
+      - MODEL_RETRAIN_THRESHOLD=0.1
+      - PYTHON_PATH=/opt/airflow
+    volumes:
+      - ./Dataset:/data:ro
+      - fish_models:/models
+      - ./fish_supervised_pipeline.py:/app/fish_supervised_pipeline.py
+      - fish_logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+    networks:
+      - fish_network
+
+  # 7. Fish Monitoring Dashboard (Optional) 📊
+  fish-monitor:
+    build: .
+    container_name: fish_monitor
+    command: python monitor_pipeline.py
+    environment:
+      - MONITOR_INTERVAL=300  # 5 minutes
+      - FISH_API_URL=http://fish-api:8000
+      - AIRFLOW_URL=http://airflow-webserver:8080
+    volumes:
+      - ./monitor_pipeline.py:/app/monitor_pipeline.py
+      - fish_models:/models:ro
+      - fish_logs:/app/logs
+    depends_on:
+      - fish-api
+      - airflow-webserver
+    restart: always
+    networks:
+      - fish_network
+
+# Named volumes for persistent fish data
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/postgres
+  
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/redis
+  
+  fish_models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/fish_models
+  
+  fish_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/fish
+
+# Dedicated network for fish prediction services
+networks:
+  fish_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
