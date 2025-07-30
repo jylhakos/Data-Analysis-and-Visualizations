@@ -1,12 +1,10 @@
-# Data Analysis and Visualizations
+# Tableau
 
-## Leveraging Python, Pandas, NumPy, Dask, PySpark and Plotly with Tableau or Power BI for Data Visualization
+## Leveraging Python with Tableau for Data Visualization
 
-You can integrate Python and the Plotly library with both Tableau and Power BI, allowing you to create custom visualizations and enhance data analysis capabilities.
+You can integrate Python and the Plotly library with both Tableau, allowing you to create custom visualizations and enhance data analysis capabilities.
 
-### Tableau
-
-TabPy 
+### TabPy 
 
 Tableau allows integration with Python through TabPy (Tableau Python Server) or the Tableau Python Data Connector (TDC). 
 
