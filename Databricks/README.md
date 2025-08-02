@@ -2,7 +2,7 @@
 
 ![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Databricks/An_overview_of_generative_AI_capabilities_with_Databricks_and_AWS.png?raw=true)
 
-Figure: An overview of generative AI capabilities with Databricks and AWS
+_Figure: An overview of generative AI capabilities with **Amazon AWS and Databricks**
 
 ## Use case: Fine-tuning a BERT model
 
@@ -59,51 +59,51 @@ Amazon Databricks is a unified data analytics platform that combines data engine
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        AWS Cloud Environment                      │
+│                        AWS Cloud Environment                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  ┌─────────────────┐    ┌──────────────────┐                   │
-│  │   Amazon S3     │    │   Unity Catalog  │                   │
-│  │                 │    │                  │                   │
-│  │ • Training Data │    │ • Model Registry │                   │
-│  │ • Model Artifacts│   │ • Data Governance│                   │
-│  │ • Logs & Metrics│    │ • Access Control │                   │
-│  └─────────────────┘    └──────────────────┘                   │
-│           │                       │                            │
-│           ▼                       ▼                            │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │            Amazon Databricks Workspace                     │ │
-│  │                                                             │ │
-│  │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐│ │
-│  │  │   Data Prep     │  │  BERT Training  │  │   MLflow     ││ │
-│  │  │                 │  │                 │  │              ││ │
-│  │  │ • Load Data     │  │ • Model Loading │  │ • Experiment ││ │
-│  │  │ • Tokenization  │  │ • Fine-tuning   │  │   Tracking   ││ │
-│  │  │ • Preprocessing │  │ • Quantization  │  │ • Model      ││ │
-│  │  │                 │  │ • Evaluation    │  │   Versioning ││ │
-│  │  └─────────────────┘  └─────────────────┘  └──────────────┘│ │
-│  │                                                             │ │
-│  │  ┌─────────────────────────────────────────────────────────┐│ │
-│  │  │              GPU Cluster (p3/g4dn instances)           ││ │
-│  │  │                                                         ││ │
-│  │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      ││ │
-│  │  │  │   Worker    │ │   Worker    │ │   Worker    │      ││ │
-│  │  │  │    Node     │ │    Node     │ │    Node     │      ││ │
-│  │  │  │             │ │             │ │             │      ││ │
-│  │  │  │ • PyTorch   │ │ • PyTorch   │ │ • PyTorch   │      ││ │
-│  │  │  │ • CUDA      │ │ • CUDA      │ │ • CUDA      │      ││ │
-│  │  │  │ • BERT      │ │ • BERT      │ │ • BERT      │      ││ │
-│  │  │  └─────────────┘ └─────────────┘ └─────────────┘      ││ │
-│  │  └─────────────────────────────────────────────────────────┘│ │
-│  └─────────────────────────────────────────────────────────────┘ │
+│  ┌─────────────────┐    ┌──────────────────┐                    │
+│  │   Amazon S3     │    │   Unity Catalog  │                    │
+│  │                 │    │                  │                    │
+│  │ • Training Data │    │ • Model Registry │                    │
+│  │ • Model Artifacts│   │ • Data Governance│                    │
+│  │ • Logs & Metrics│    │ • Access Control │                    │
+│  └─────────────────┘    └──────────────────┘                    │
+│           │                       │                             │
+│           ▼                       ▼                             │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │            Amazon Databricks Workspace                      ││
+│  │                                                             ││
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ ││
+│  │  │   Data Prep     │  │  BERT Training  │  │   MLflow     │ ││
+│  │  │                 │  │                 │  │              │ ││
+│  │  │ • Load Data     │  │ • Model Loading │  │ • Experiment │ ││
+│  │  │ • Tokenization  │  │ • Fine-tuning   │  │   Tracking   │ ││
+│  │  │ • Preprocessing │  │ • Quantization  │  │ • Model      │ ││
+│  │  │                 │  │ • Evaluation    │  │   Versioning │ ││
+│  │  └─────────────────┘  └─────────────────┘  └──────────────┘ ││
+│  │                                                             ││
+│  │  ┌─────────────────────────────────────────────────────────┐││
+│  │  │              GPU Cluster (p3/g4dn instances)            │││
+│  │  │                                                         │││
+│  │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐        │││
+│  │  │  │   Worker    │ │   Worker    │ │   Worker    │        │││
+│  │  │  │    Node     │ │    Node     │ │    Node     │        │││
+│  │  │  │             │ │             │ │             │        │││
+│  │  │  │ • PyTorch   │ │ • PyTorch   │ │ • PyTorch   │        │││
+│  │  │  │ • CUDA      │ │ • CUDA      │ │ • CUDA      │        │││
+│  │  │  │ • BERT      │ │ • BERT      │ │ • BERT      │        │││
+│  │  │  └─────────────┘ └─────────────┘ └─────────────┘        │││
+│  │  └─────────────────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────────────────┘│
 │                                                                 │
-│  ┌─────────────────┐    ┌──────────────────┐                   │
-│  │   Amazon IAM    │    │   Amazon VPC     │                   │
-│  │                 │    │                  │                   │
-│  │ • Service Roles │    │ • Network Security│                  │
-│  │ • Access Policies│   │ • Private Subnets│                  │
-│  │ • Cross-account │    │ • Security Groups│                  │
-│  └─────────────────┘    └──────────────────┘                   │
+│  ┌─────────────────┐    ┌──────────────────┐                    │
+│  │   Amazon IAM    │    │   Amazon VPC     │                    │
+│  │                 │    │                  │                    │
+│  │ • Service Roles │    │ • Network Security│                   │
+│  │ • Access Policies│   │ • Private Subnets│                    │
+│  │ • Cross-account │    │ • Security Groups│                    │
+│  └─────────────────┘    └──────────────────┘                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
