@@ -1,0 +1,317 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Infrastructure for Databricks BERT Fine-tuning Environment'
+
+Parameters:
+  DatabricksAccountId:
+    Type: String
+    Description: 'Your Databricks Account ID'
+    Default: '414351767826'  # Databricks AWS Account ID
+  
+  CrossAccountRoleName:
+    Type: String
+    Description: 'Name for the Databricks cross-account IAM role'
+    Default: 'DatabricksCrossAccountRole'
+  
+  BucketName:
+    Type: String
+    Description: 'S3 bucket name for storing training data and models'
+    Default: 'databricks-bert-training-bucket'
+
+Resources:
+  # S3 Bucket for training data and models
+  TrainingDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${BucketName}-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Purpose
+          Value: DatabricksBERTTraining
+        - Key: Environment
+          Value: Production
+
+  # IAM Role for Databricks Cross-Account Access
+  DatabricksCrossAccountRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CrossAccountRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${DatabricksAccountId}:root'
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Ref 'AWS::AccountId'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+      Policies:
+        - PolicyName: DatabricksAdditionalPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:AssociateDhcpOptions
+                  - ec2:AssociateIamInstanceProfile
+                  - ec2:AttachVolume
+                  - ec2:AuthorizeSecurityGroupEgress
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:CancelSpotInstanceRequests
+                  - ec2:CreateDhcpOptions
+                  - ec2:CreateImage
+                  - ec2:CreateInstanceExportTask
+                  - ec2:CreateKeyPair
+                  - ec2:CreatePlacementGroup
+                  - ec2:CreateRoute
+                  - ec2:CreateSecurityGroup
+                  - ec2:CreateSnapshot
+                  - ec2:CreateTags
+                  - ec2:CreateVolume
+                  - ec2:CreateVpc
+                  - ec2:CreateSubnet
+                  - ec2:CreateInternetGateway
+                  - ec2:CreateRouteTable
+                  - ec2:DeleteDhcpOptions
+                  - ec2:DeleteKeyPair
+                  - ec2:DeletePlacementGroup
+                  - ec2:DeleteRoute
+                  - ec2:DeleteSecurityGroup
+                  - ec2:DeleteSnapshot
+                  - ec2:DeleteSubnet
+                  - ec2:DeleteTags
+                  - ec2:DeleteVolume
+                  - ec2:DeleteVpc
+                  - ec2:DeleteInternetGateway
+                  - ec2:DeleteRouteTable
+                  - ec2:DescribeAvailabilityZones
+                  - ec2:DescribeAccountAttributes
+                  - ec2:DescribeInstances
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeInstanceAttribute
+                  - ec2:DescribeInstanceTypes
+                  - ec2:DescribeInternetGateways
+                  - ec2:DescribeKeyPairs
+                  - ec2:DescribePlacementGroups
+                  - ec2:DescribePrefixLists
+                  - ec2:DescribeReservedInstancesOfferings
+                  - ec2:DescribeRouteTables
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeSpotInstanceRequests
+                  - ec2:DescribeSpotPriceHistory
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeVolumes
+                  - ec2:DescribeVpcAttribute
+                  - ec2:DescribeVpcs
+                  - ec2:DetachVolume
+                  - ec2:DisassociateIamInstanceProfile
+                  - ec2:ModifyVpcAttribute
+                  - ec2:ReplaceIamInstanceProfileAssociation
+                  - ec2:RequestSpotInstances
+                  - ec2:RevokeSecurityGroupEgress
+                  - ec2:RevokeSecurityGroupIngress
+                  - ec2:RunInstances
+                  - ec2:TerminateInstances
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:CreateInstanceProfile
+                  - iam:PutRolePolicy
+                  - iam:AddRoleToInstanceProfile
+                  - iam:RemoveRoleFromInstanceProfile
+                  - iam:ListInstanceProfiles
+                  - iam:PassRole
+                Resource: '*'
+
+  # IAM Instance Profile for Databricks clusters
+  DatabricksInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: DatabricksInstanceProfile
+      Roles:
+        - !Ref DatabricksInstanceRole
+
+  # IAM Role for Databricks cluster instances
+  DatabricksInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DatabricksInstanceRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub '${TrainingDataBucket}/*'
+                  - !Ref TrainingDataBucket
+
+  # VPC for Databricks (optional - can use default VPC)
+  DatabricksVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: DatabricksVPC
+
+  # Internet Gateway
+  DatabricksIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: DatabricksIGW
+
+  # Attach IGW to VPC
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref DatabricksVPC
+      InternetGatewayId: !Ref DatabricksIGW
+
+  # Public Subnet 1
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DatabricksVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: DatabricksPublicSubnet1
+
+  # Public Subnet 2
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DatabricksVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: DatabricksPublicSubnet2
+
+  # Route Table
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref DatabricksVPC
+      Tags:
+        - Key: Name
+          Value: DatabricksPublicRouteTable
+
+  # Route to Internet Gateway
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref DatabricksIGW
+
+  # Associate Route Table with Subnets
+  PublicSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # Security Group for Databricks
+  DatabricksSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Databricks clusters
+      VpcId: !Ref DatabricksVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref DatabricksSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 8443
+          ToPort: 8451
+          SourceSecurityGroupId: !Ref DatabricksSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: DatabricksSecurityGroup
+
+Outputs:
+  CrossAccountRoleArn:
+    Description: 'ARN of the cross-account role for Databricks'
+    Value: !GetAtt DatabricksCrossAccountRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-CrossAccountRoleArn'
+
+  S3BucketName:
+    Description: 'Name of the S3 bucket for training data'
+    Value: !Ref TrainingDataBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-S3BucketName'
+
+  VPCId:
+    Description: 'ID of the VPC for Databricks'
+    Value: !Ref DatabricksVPC
+    Export:
+      Name: !Sub '${AWS::StackName}-VPCId'
+
+  SubnetIds:
+    Description: 'Subnet IDs for Databricks clusters'
+    Value: !Sub '${PublicSubnet1},${PublicSubnet2}'
+    Export:
+      Name: !Sub '${AWS::StackName}-SubnetIds'
+
+  SecurityGroupId:
+    Description: 'Security Group ID for Databricks'
+    Value: !Ref DatabricksSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-SecurityGroupId'
+
+  InstanceProfileArn:
+    Description: 'ARN of the instance profile for Databricks clusters'
+    Value: !GetAtt DatabricksInstanceProfile.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-InstanceProfileArn'

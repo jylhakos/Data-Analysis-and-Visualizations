@@ -1,0 +1,392 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Amazon Bedrock BERT Fine-tuning Infrastructure - CloudFormation Template'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: 'bert-fine-tuning'
+    Description: 'Project name for resource naming and tagging'
+    AllowedPattern: '^[a-z0-9-]+$'
+    ConstraintDescription: 'Must contain only lowercase letters, numbers, and hyphens'
+
+  Environment:
+    Type: String
+    Default: 'dev'
+    AllowedValues: ['dev', 'staging', 'prod']
+    Description: 'Environment name for resource tagging'
+
+  MaxBudgetAmount:
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 10000
+    Description: 'Maximum budget amount in USD for cost control'
+
+  NotificationEmail:
+    Type: String
+    Description: 'Email address for budget alerts and notifications'
+    AllowedPattern: '^[\w\.-]+@[\w\.-]+\.[a-z]{2,}$'
+    ConstraintDescription: 'Must be a valid email address'
+
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653]
+    Description: 'Number of days to retain CloudWatch logs'
+
+  EnableDetailedMonitoring:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: 'Enable detailed CloudWatch monitoring'
+
+Resources:
+  # S3 bucket for training data and model artifacts
+  BedrockTrainingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-${Environment}-${AWS::AccountId}-${AWS::Region}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      NotificationConfiguration:
+        CloudWatchConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            CloudWatchConfiguration:
+              LogGroupName: !Ref BedrockLogGroup
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: 'Bedrock training data storage'
+
+  # S3 bucket policy for secure access
+  BedrockTrainingBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BedrockTrainingBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: 'AllowBedrockAccess'
+            Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+            Action:
+              - 's3:GetObject'
+              - 's3:PutObject'
+              - 's3:DeleteObject'
+              - 's3:ListBucket'
+            Resource:
+              - !Sub '${BedrockTrainingBucket}/*'
+              - !Ref BedrockTrainingBucket
+          - Sid: 'DenyUnSecureCommunications'
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !Sub '${BedrockTrainingBucket}/*'
+              - !Ref BedrockTrainingBucket
+            Condition:
+              Bool:
+                'aws:SecureTransport': 'false'
+
+  # IAM role for Amazon Bedrock execution
+  BedrockExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-bedrock-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: BedrockS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                  - 's3:ListBucket'
+                Resource:
+                  - !Sub '${BedrockTrainingBucket}/*'
+                  - !Ref BedrockTrainingBucket
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # IAM role for developers/CI-CD
+  BedrockDeveloperRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-developer-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                'sts:ExternalId': 'bedrock-fine-tuning'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
+      Policies:
+        - PolicyName: BedrockDeveloperPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                  - 's3:ListBucket'
+                  - 'iam:PassRole'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'logs:DescribeLogGroups'
+                  - 'logs:DescribeLogStreams'
+                  - 'cloudwatch:PutMetricData'
+                  - 'cloudwatch:GetMetricStatistics'
+                  - 'cloudwatch:ListMetrics'
+                Resource: '*'
+
+  # CloudWatch Log Group for Bedrock fine-tuning
+  BedrockLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/bedrock/${ProjectName}'
+      RetentionInDays: !Ref LogRetentionDays
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: 'Bedrock fine-tuning logs'
+
+  # SNS topic for alerts
+  BedrockAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${ProjectName}-alerts'
+      DisplayName: !Sub '${ProjectName} Bedrock Alerts'
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # SNS subscription for email alerts
+  EmailAlertsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn: !Ref BedrockAlertsTopic
+      Endpoint: !Ref NotificationEmail
+
+  # Budget for cost control
+  BedrockBudget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub '${ProjectName}-budget'
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        TimePeriod:
+          Start: '2024-01-01_00:00'
+        BudgetLimit:
+          Amount: !Ref MaxBudgetAmount
+          Unit: USD
+        CostFilters:
+          Service:
+            - Amazon Bedrock
+        NotificationsWithSubscribers:
+          - Notification:
+              NotificationType: ACTUAL
+              ComparisonOperator: GREATER_THAN
+              Threshold: 80
+              ThresholdType: PERCENTAGE
+            Subscribers:
+              - SubscriptionType: EMAIL
+                Address: !Ref NotificationEmail
+          - Notification:
+              NotificationType: FORECASTED
+              ComparisonOperator: GREATER_THAN
+              Threshold: 100
+              ThresholdType: PERCENTAGE
+            Subscribers:
+              - SubscriptionType: EMAIL
+                Address: !Ref NotificationEmail
+
+  # CloudWatch alarm for high costs
+  HighCostAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-high-cost-alarm'
+      AlarmDescription: 'Alarm for high estimated charges on Bedrock usage'
+      MetricName: EstimatedCharges
+      Namespace: AWS/Billing
+      Statistic: Maximum
+      Period: 86400  # 24 hours
+      EvaluationPeriods: 1
+      Threshold: !Ref MaxBudgetAmount
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Currency
+          Value: USD
+      AlarmActions:
+        - !Ref BedrockAlertsTopic
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Lambda function for automated cleanup (optional)
+  CleanupFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-cleanup-function'
+      Runtime: python3.9
+      Handler: index.lambda_handler
+      Role: !GetAtt CleanupFunctionRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+          import logging
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              """
+              Automated cleanup function for Bedrock resources
+              Triggered by CloudWatch events or manually
+              """
+              try:
+                  bedrock = boto3.client('bedrock')
+                  s3 = boto3.client('s3')
+                  
+                  # List and clean up old training jobs if needed
+                  # Add your cleanup logic here
+                  
+                  logger.info("Cleanup completed successfully")
+                  return {
+                      'statusCode': 200,
+                      'body': json.dumps('Cleanup completed')
+                  }
+              except Exception as e:
+                  logger.error(f"Cleanup failed: {str(e)}")
+                  return {
+                      'statusCode': 500,
+                      'body': json.dumps(f'Cleanup failed: {str(e)}')
+                  }
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # IAM role for cleanup Lambda function
+  CleanupFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CleanupPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'bedrock:ListModelCustomizationJobs'
+                  - 'bedrock:GetModelCustomizationJob'
+                  - 'bedrock:StopModelCustomizationJob'
+                  - 's3:ListBucket'
+                  - 's3:DeleteObject'
+                Resource: '*'
+
+Outputs:
+  S3BucketName:
+    Description: 'Name of the S3 bucket for training data'
+    Value: !Ref BedrockTrainingBucket
+    Export:
+      Name: !Sub '${ProjectName}-S3Bucket'
+
+  S3BucketArn:
+    Description: 'ARN of the S3 bucket'
+    Value: !GetAtt BedrockTrainingBucket.Arn
+    Export:
+      Name: !Sub '${ProjectName}-S3BucketArn'
+
+  BedrockExecutionRoleArn:
+    Description: 'ARN of the Bedrock execution role'
+    Value: !GetAtt BedrockExecutionRole.Arn
+    Export:
+      Name: !Sub '${ProjectName}-BedrockExecutionRole'
+
+  DeveloperRoleArn:
+    Description: 'ARN of the developer role for local access'
+    Value: !GetAtt BedrockDeveloperRole.Arn
+    Export:
+      Name: !Sub '${ProjectName}-DeveloperRole'
+
+  CloudWatchLogGroupName:
+    Description: 'Name of the CloudWatch log group'
+    Value: !Ref BedrockLogGroup
+    Export:
+      Name: !Sub '${ProjectName}-LogGroup'
+
+  SNSTopicArn:
+    Description: 'ARN of the SNS topic for alerts'
+    Value: !Ref BedrockAlertsTopic
+    Export:
+      Name: !Sub '${ProjectName}-SNSTopic'
+
+  AWSRegion:
+    Description: 'AWS Region where resources are deployed'
+    Value: !Ref 'AWS::Region'
+
+  AccountId:
+    Description: 'AWS Account ID'
+    Value: !Ref 'AWS::AccountId'

@@ -1,0 +1,60 @@
+# BERT Fine-tuning Configuration Template
+# Copy this file and modify for your specific use case
+
+model:
+  model_name: "bert-base-uncased"  # Can be: bert-base-uncased, bert-large-uncased, distilbert-base-uncased
+  num_labels: 2  # Number of classification labels
+  max_length: 128  # Maximum sequence length for tokenization
+  quantize: true  # Apply quantization for deployment efficiency
+
+training:
+  num_epochs: 3  # Number of training epochs
+  batch_size: 16  # Training batch size (adjust based on GPU memory)
+  learning_rate: 2e-5  # Learning rate for optimizer
+  warmup_steps: 500  # Number of warmup steps for learning rate scheduler
+  weight_decay: 0.01  # Weight decay for regularization
+  gradient_accumulation_steps: 1  # Gradient accumulation for effective larger batch sizes
+  fp16: true  # Use mixed precision training (requires CUDA)
+
+data:
+  train_path: "s3://your-training-bucket/data/train.jsonl"  # Path to training data
+  test_path: "s3://your-training-bucket/data/test.jsonl"   # Path to test data
+  text_column: "text"    # Name of text column in dataset
+  label_column: "label"  # Name of label column in dataset
+
+mlflow:
+  experiment_name: "/Users/your-email@company.com/bert-fine-tuning"  # MLflow experiment name
+  run_name: "bert-classification"  # MLflow run name
+  model_name: "bert_sentiment_classifier"  # Model name for registration
+
+databricks:
+  catalog_name: "ml_models"      # Unity Catalog name
+  schema_name: "bert_experiments"  # Schema name in Unity Catalog
+
+output:
+  model_path: "s3://your-model-bucket/models/"  # Path to save trained models
+  log_path: "s3://your-model-bucket/logs/"      # Path to save training logs
+
+# Databricks Cluster Configuration (for reference)
+cluster:
+  name: "bert-training-cluster"
+  node_type_id: "g4dn.2xlarge"  # GPU instance type
+  driver_node_type_id: "g4dn.2xlarge"
+  min_workers: 1
+  max_workers: 4
+  spark_version: "13.3.x-ml-scala2.12"  # Databricks Runtime ML version
+  autotermination_minutes: 120
+
+# AWS Configuration (set as environment variables)
+aws:
+  region: "us-west-2"
+  s3_bucket: "your-training-bucket"
+  iam_role: "arn:aws:iam::your-account:role/DatabricksRole"
+
+# Performance Optimization Tips:
+# 1. For small datasets (< 1GB): Use g4dn.xlarge or g4dn.2xlarge
+# 2. For medium datasets (1-10GB): Use p3.2xlarge
+# 3. For large datasets (> 10GB): Use p3.8xlarge or p3.16xlarge
+# 4. Increase gradient_accumulation_steps if you need larger effective batch sizes
+# 5. Enable fp16 for faster training on modern GPUs
+# 6. Adjust batch_size based on GPU memory availability
