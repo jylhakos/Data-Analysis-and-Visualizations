@@ -8,15 +8,13 @@ You can choose from a range of foundation models to find the model that is best 
 
 Evaluate outputs of different models with prompts to determine the model that is best suited for your application.
 
-### Here's a step-by-step demo to fine-tune a model
-
 Model customization is the process of providing training data to a model in order to improve its performance for specific use-cases.
 
-## 🔥 Complete Amazon Bedrock BERT Fine-Tuning Solution
+## Amazon Bedrock BERT fine-tuning solution
 
 This repository now includes a **comprehensive solution** for fine-tuning BERT models using Amazon Bedrock, combining local development with cloud-scale managed infrastructure.
 
-### 🏗️ Architecture Overview
+### Architecture
 
 ```mermaid
 graph TD
@@ -43,11 +41,11 @@ graph TD
     style I fill:#2196F3,color:#ffffff
 ```
 
-### � Documentation Structure
+### Documentation
 
 This repository provides comprehensive documentation for both **local development** and **Amazon Bedrock cloud deployment**:
 
-#### 🏠 **Local Development & API Documentation**
+#### **Local Development & API Documentation**
 - **[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**: Complete local API reference
   - FastAPI endpoint documentation
   - Local setup and troubleshooting
@@ -60,11 +58,11 @@ This repository provides comprehensive documentation for both **local developmen
 - **[fine-tuning/RESOURCE_CALCULATOR.md](./fine-tuning/RESOURCE_CALCULATOR.md)**: AWS resource allocation
 - This README: Architecture overview and cloud setup
 
-> 💡 **For DevOps teams**: Use the local documentation for development/testing environments and the Bedrock documentation for production cloud deployments.
+> **For DevOps teams**: Use the local documentation for development/testing environments and the Bedrock documentation for production cloud deployments.
 
-### �🚀 Quick Start Guide
+### Start
 
-#### Option 1: Automated Setup (Recommended)
+#### Option 1: Automated setup (Recommended)
 ```bash
 # Navigate to the fine-tuning directory
 cd "Amazon Bedrock/fine-tuning"
@@ -80,7 +78,7 @@ chmod +x setup_bedrock.sh
 # - Email notifications
 ```
 
-#### Option 2: Manual Step-by-Step Setup
+#### Option 2: Manual Step-by-step setup
 
 **Step 1: Prerequisites**
 ```bash
@@ -96,7 +94,7 @@ aws configure
 aws bedrock list-foundation-models --region us-east-1
 ```
 
-**Step 2: Python Environment Setup**
+**Step 2: Python Environment setup**
 ```bash
 # Create dedicated environment for Bedrock
 python3 -m venv bedrock_env
@@ -109,7 +107,7 @@ pip install -r requirements-bedrock.txt
 python -c "import boto3, torch, transformers; print('✅ All dependencies installed')"
 ```
 
-**Step 3: Infrastructure Deployment**
+**Step 3: Infrastructure deployment**
 
 Choose your preferred Infrastructure as Code tool:
 
@@ -134,7 +132,7 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_IAM
 ```
 
-**Step 4: Configure and Run Fine-tuning**
+**Step 4: Configure and run fine-tuning**
 ```bash
 # Run the complete example workflow
 python bedrock_example.py --mode all
@@ -145,7 +143,7 @@ python bedrock_example.py --mode train    # Start fine-tuning job
 python bedrock_example.py --mode evaluate # Evaluate model performance
 ```
 
-**Step 5: Monitor Costs and Usage**
+**Step 5: Monitor costs and usage**
 ```bash
 # Check current costs
 python cost_monitor.py --check-current
@@ -157,23 +155,21 @@ python cost_monitor.py --report monthly --output monthly_report.json
 python cost_monitor.py --set-alert 50.0 --email your-email@example.com
 ```
 
-### 📋 What's Included
+### What's included in this files?
 
-The complete solution includes:
-
-#### 🧠 **Core Fine-tuning Components**
+#### **Fine-tuning components**
 - **`src/bert_fine_tuning.py`**: Original local BERT fine-tuning script
 - **`src/bedrock_bert_fine_tuning.py`**: Amazon Bedrock integration layer
 - **`bedrock_example.py`**: Complete workflow demonstration
 - **`cost_monitor.py`**: Cost tracking and optimization
 
-#### 🏗️ **Infrastructure as Code**
+#### **Infrastructure as Code**
 - **`infrastructure/main.tf`**: Terraform configuration for AWS resources
 - **`infrastructure/bedrock-cloudformation.yaml`**: CloudFormation alternative
 - **`infrastructure/variables.tf`**: Configurable parameters
 - **`setup_bedrock.sh`**: Automated deployment script
 
-#### 📊 **Monitoring & Cost Control**
+#### **Monitoring & cost control**
 - **CloudWatch Integration**: Automatic logging and metrics
 - **Budget Controls**: Automated cost alerts and limits
 - **Performance Tracking**: Training metrics and evaluation
@@ -184,21 +180,21 @@ The complete solution includes:
 - **`config/`**: Configuration files for different environments
 - **Environment Variables**: Secure credential management
 
-### 💰 **Cost Management Features**
+### **Cost management**
 
-#### Automated Budget Controls
+#### Automated budget controls
 - **Budget Limits**: Set maximum spending limits with automatic alerts
 - **Cost Monitoring**: Real-time tracking of Bedrock usage costs
 - **Threshold Alerts**: Email notifications at 50%, 80%, and 100% of budget
 - **Resource Cleanup**: Automatic cleanup of unused resources
 
-#### Cost Optimization
+#### Cost optimization
 - **Smart Batching**: Optimal batch sizes for cost-effective training
 - **Model Selection**: Guidance on choosing cost-effective base models
 - **Training Optimization**: Hyperparameter tuning for faster convergence
 - **Usage Analytics**: Detailed cost breakdowns and recommendations
 
-### 🔐 **Security & Compliance**
+### 🔐 **Security & compliance**
 
 #### Enterprise Security
 - **IAM Roles**: Least-privilege access policies
@@ -212,11 +208,11 @@ The complete solution includes:
 - **Retention Policies**: Configurable data retention periods
 - **Compliance Reporting**: Automated compliance reports
 
-### 🎯 **DevOps Integration**
+### **DevOps**
 
-The solution supports modern DevOps practices:
+The solution supports DevOps.
 
-#### CI/CD Integration
+#### CI/CD
 ```yaml
 # Example GitHub Actions workflow
 name: Bedrock BERT Fine-tuning
@@ -245,27 +241,27 @@ jobs:
           python bedrock_example.py --mode all
 ```
 
-#### Monitoring Integration
+#### Monitoring
 - **CloudWatch Dashboards**: Custom dashboards for training metrics
 - **SNS Notifications**: Real-time alerts for job completion/failure
 - **Cost Analytics**: Integration with AWS Cost Explorer
 - **Performance Metrics**: Training accuracy and loss tracking
 
-### 📈 **Performance Optimization**
+### **Performance optimization**
 
-#### Training Optimization
+#### Training optimization
 - **Automatic Mixed Precision**: Faster training with lower memory usage
 - **Gradient Accumulation**: Handle larger effective batch sizes
 - **Learning Rate Scheduling**: Optimal learning rate strategies
 - **Early Stopping**: Prevent overfitting and reduce costs
 
-#### Resource Optimization
+#### Resource optimization
 - **Instance Selection**: Automated selection of optimal instance types
 - **Spot Instances**: Cost savings with spot instance integration
 - **Auto-scaling**: Dynamic resource allocation based on workload
 - **Resource Monitoring**: Real-time resource utilization tracking
 
-### 🔄 **Model Lifecycle Management**
+### **Model lifecycle**
 
 #### Version Control
 - **Model Versioning**: Automatic versioning of fine-tuned models
@@ -279,7 +275,7 @@ jobs:
 - **Canary Releases**: Gradual rollout of new models
 - **Performance Monitoring**: Production model performance tracking
 
-### 📚 **Documentation & Support**
+### **Documentation**
 
 #### Comprehensive Documentation
 - **[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**: Local development API reference and troubleshooting
@@ -294,28 +290,17 @@ jobs:
 - **Content Moderation**: Automated content filtering
 - **Custom Domain Tasks**: Industry-specific classification
 
-### 🌟 **Key Benefits**
+This integration allows you to leverage Amazon Bedrock's managed infrastructure while maintaining your existing BERT fine-tuning code and extending it with cloud-native capabilities for production-scale deployments.
 
-✅ **Scalability**: Leverage Amazon Bedrock's managed infrastructure
-✅ **Cost Control**: Built-in budget monitoring and optimization
-✅ **Security**: Enterprise-grade security and compliance
-✅ **Ease of Use**: Automated setup and deployment
-✅ **Monitoring**: Comprehensive logging and metrics
-✅ **Integration**: Seamless AWS ecosystem integration
-✅ **Performance**: Optimized for production workloads
-✅ **Flexibility**: Support for various model architectures
+## Amazon AWS resource allocation & estimation for fine-tuning Pipeline
 
-This integration allows you to leverage Amazon Bedrock's managed infrastructure while maintaining your existing BERT fine-tuning codebase and extending it with cloud-native capabilities for production-scale deployments.
-
-## 🏗️ AWS Resource Allocation & Estimation for Fine-Tuning Pipeline
-
-### 💡 Overview: Choosing the Right AWS Infrastructure
+### Overview: Choosing the right Amazon AWS infrastructure
 
 When fine-tuning BERT models at scale, selecting the appropriate AWS resources is critical for balancing performance, cost, and efficiency. AWS offers a comprehensive range of compute, storage, and networking solutions optimized for ML workloads.
 
-### 🖥️ Amazon EC2 Instance Selection for ML Training
+### Amazon EC2 instance selection for ML training
 
-#### **GPU-Based Instances (Recommended for BERT Fine-tuning)**
+#### **GPU-Based instances (Recommended for BERT fine-tuning)**
 
 **Amazon EC2 P5 Instances** - *Latest Generation GPU Instances*
 - **Use Case**: Large-scale BERT fine-tuning, complex transformer models
@@ -335,7 +320,7 @@ p5.2xlarge      | 1    | 80 GB      | 12    | 128 GB  | $8.19      | Development
 *Prices shown are approximate for us-east-1 region
 ```
 
-**Amazon EC2 P4d Instances** - *High-Performance GPU Instances*
+**Amazon EC2 P4d instances** - *High-Performance GPU Instances*
 - **Use Case**: Cost-effective alternative for medium-scale fine-tuning
 - **Specifications**: NVIDIA A100 40GB/80GB GPUs
 - **Performance**: 2.5x faster than P3 instances
@@ -348,12 +333,12 @@ p4d.24xlarge    | 8    | 320 GB     | 96    | 1152 GB | $32.77     | Multi-GPU t
 p4de.24xlarge   | 8    | 640 GB     | 96    | 1152 GB | $40.96     | Large context models
 ```
 
-**Amazon EC2 G5 Instances** - *Cost-Effective GPU Instances*
+**Amazon EC2 G5 instances** - *Cost-Effective GPU Instances*
 - **Use Case**: Small to medium BERT fine-tuning, development
 - **Specifications**: NVIDIA A10G GPUs
 - **Best For**: Proof of concepts, smaller models, budget-conscious training
 
-#### **Purpose-Built ML Accelerators**
+#### **ML Accelerators**
 
 **Amazon EC2 Trn1/Trn1n Instances** - *AWS Trainium Accelerators*
 - **Use Case**: Cost-optimized training for large models
@@ -369,9 +354,9 @@ trn1n.32xlarge  | 16       | 128   | 512 GB  | 1600 Gbps| $24.78     | Network-i
 trn1.2xlarge    | 1        | 8     | 32 GB   | 12.5 Gbps| $1.34      | Development, small models
 ```
 
-### 📊 Resource Estimation Calculator
+### Resource estimation calculator
 
-#### **BERT Fine-tuning Resource Requirements**
+#### **BERT fine-tuning resource requirements**
 
 **Small Dataset (< 1GB, < 100K samples)**
 ```yaml
@@ -403,9 +388,9 @@ Recommended Setup:
   Memory Requirements: 512-2048 GB
 ```
 
-> 🧮 **For detailed resource calculations and cost optimization, see the [AWS Resource Calculator Guide](./fine-tuning/RESOURCE_CALCULATOR.md)**
+> **For detailed resource calculations and cost optimization, see the [AWS Resource Calculator Guide](./fine-tuning/RESOURCE_CALCULATOR.md)**
 
-### 🗄️ Storage Architecture for ML Training
+### Storage Architecture for ML training
 
 #### **Amazon S3 - Training Data Storage**
 ```bash
@@ -416,7 +401,7 @@ S3 Express One Zone   | High-performance training   | $0.16          | Ultra-fas
 S3 Intelligent-Tiering| Variable access patterns   | $0.0125        | Automatic optimization
 ```
 
-#### **Amazon EBS - Instance Storage**
+#### **Amazon EBS - instance storage**
 ```bash
 # EBS Volume Types for ML Training
 Volume Type | IOPS      | Throughput    | Cost/GB/month* | Best For
@@ -434,7 +419,7 @@ Persistent SSD    | 250-1000 MB/s  | $240-600        | Long-term training
 Persistent HDD    | 40 MB/s        | $140            | Archive/backup
 ```
 
-### 🌐 Networking Configuration
+### Networking configuration
 
 #### **Amazon EC2 UltraClusters**
 - **Scale**: Up to 20,000 GPUs in a single cluster
@@ -456,11 +441,11 @@ resource "aws_placement_group" "bert_training_cluster" {
 }
 ```
 
-### 💰 Cost Estimation & Optimization
+### Cost estimation & optimization
 
-#### **Training Cost Calculator**
+#### **Training cost calculator**
 
-**Example: Medium BERT Model Fine-tuning**
+**Example: Medium BERT model fine-tuning**
 ```python
 # Cost estimation example
 def estimate_training_cost(
@@ -486,9 +471,9 @@ def estimate_training_cost(
 # Example output: ~$295-320 for 12-hour training
 ```
 
-#### **Cost Optimization Strategies**
+#### **Cost optimization**
 
-**1. Spot Instances for Development**
+**1. Spot instances for development**
 ```bash
 # Up to 90% cost savings for interruptible workloads
 aws ec2 request-spot-instances \
@@ -502,7 +487,7 @@ aws ec2 request-spot-instances \
   }'
 ```
 
-**2. Reserved Instances for Production**
+**2. Reserved instances for production**
 ```bash
 # 1-year commitment: 40% savings
 # 3-year commitment: 60% savings
@@ -512,7 +497,7 @@ On-Demand: $24.58/hour
 3-Year Reserved: $9.83/hour (60% savings)
 ```
 
-**3. Capacity Blocks for Predictable Workloads**
+**3. Capacity blocks for predictable workloads**
 ```bash
 # Reserve GPU capacity for future training jobs
 Duration: 1-500 instances for 1-14 days
@@ -523,7 +508,7 @@ Best For: Critical training deadlines, guaranteed resources
 
 ### 🔧 Infrastructure as Code Templates
 
-#### **Terraform Configuration for Optimal ML Training Setup**
+#### **Terraform configuration for optimal ML training**
 
 ```hcl
 # Optimized EC2 instance for BERT fine-tuning
@@ -570,7 +555,7 @@ resource "aws_fsx_lustre_file_system" "training_storage" {
 }
 ```
 
-### 📈 Performance Monitoring & Optimization
+### Performance monitoring & optimization
 
 #### **CloudWatch Metrics for Training Optimization**
 
@@ -602,7 +587,7 @@ def publish_training_metrics(instance_id, gpu_utilization, memory_usage):
     )
 ```
 
-#### **Auto-Scaling for Training Workloads**
+#### **Auto-Scaling for training workloads**
 
 ```yaml
 # Auto Scaling Group for batch training jobs
@@ -624,43 +609,43 @@ AutoScalingGroup:
         PropagateAtLaunch: true
 ```
 
-### 🎯 Best Practices for Resource Selection
+### Best Practices for resource selection
 
-#### **DevOps Checklist for AWS Resource Allocation**
+#### **DevOps Checklist for Amazon AWS resource allocation**
 
-**✅ Pre-Training Assessment**
-- [ ] Estimate dataset size and complexity
-- [ ] Determine training duration requirements
-- [ ] Set budget constraints and cost alerts
-- [ ] Choose appropriate AWS region for data locality
+**Pre-Training assessment**
+- Estimate dataset size and complexity
+- Determine training duration requirements
+- Set budget constraints and cost alerts
+- Choose appropriate AWS region for data locality
 
-**✅ Compute Selection**
-- [ ] P5 instances for production, latest models
-- [ ] P4d instances for cost-effective alternative
-- [ ] Trainium for cost optimization at scale
-- [ ] Spot instances for development/testing
+**Compute selection**
+- P5 instances for production, latest models
+- P4d instances for cost-effective alternative
+- Trainium for cost optimization at scale
+- Spot instances for development/testing
 
-**✅ Storage Configuration**
-- [ ] S3 Express One Zone for high-performance data access
-- [ ] FSx Lustre for distributed training workloads
-- [ ] EBS gp3 for local instance storage
-- [ ] Enable S3 Transfer Acceleration for global datasets
+**Storage configuration**
+- S3 Express One Zone for high-performance data access
+- FSx Lustre for distributed training workloads
+- EBS gp3 for local instance storage
+- Enable S3 Transfer Acceleration for global datasets
 
-**✅ Network Optimization**
-- [ ] Use placement groups for multi-instance training
-- [ ] Enable Enhanced Networking (ENA/SR-IOV)
-- [ ] Configure EFA for distributed training
-- [ ] Monitor network utilization and adjust
+**Network optimization**
+- Use placement groups for multi-instance training
+- Enable Enhanced Networking (ENA/SR-IOV)
+- Configure EFA for distributed training
+- Monitor network utilization and adjust
 
-**✅ Cost Management**
-- [ ] Set up billing alerts and budgets
-- [ ] Use Reserved Instances for predictable workloads
-- [ ] Implement auto-shutdown for idle instances
-- [ ] Monitor and optimize resource utilization
+**Cost management**
+- Set up billing alerts and budgets
+- Use Reserved Instances for predictable workloads
+- Implement auto-shutdown for idle instances
+- Monitor and optimize resource utilization
 
-### 🚀 Quick Start Resource Configurations
+### Start resource configurations
 
-#### **Development Environment (Budget: $50-100)**
+#### **Development environment (Budget: $50-100)**
 ```bash
 Instance: g5.xlarge ($1.19/hour)
 Storage: 100 GB EBS gp3
@@ -669,7 +654,7 @@ Dataset: < 1 GB
 Use Case: Proof of concept, algorithm development
 ```
 
-#### **Production Environment (Budget: $500-2000)**
+#### **Production environment (Budget: $500-2000)**
 ```bash
 Instance: p5.12xlarge ($24.58/hour)
 Storage: 500 GB EBS gp3 + S3 Express One Zone
@@ -678,7 +663,7 @@ Dataset: 1-10 GB
 Use Case: Production fine-tuning, evaluation
 ```
 
-#### **Enterprise Environment (Budget: $2000+)**
+#### **Enterprise environment (Budget: $2000+)**
 ```bash
 Instance: UltraCluster with P5.48xlarge
 Storage: Multi-TB FSx Lustre + S3
@@ -687,7 +672,7 @@ Dataset: > 10 GB
 Use Case: Large-scale models, research, production at scale
 ```
 
-This comprehensive resource allocation guide helps DevOps teams make informed decisions about AWS infrastructure for BERT fine-tuning, balancing performance requirements with cost optimization.
+This resource allocation guide helps DevOps teams make decisions about AWS infrastructure for BERT fine-tuning, balancing performance requirements with cost optimization.
 
 ### References
 
@@ -728,4 +713,3 @@ This comprehensive resource allocation guide helps DevOps teams make informed de
 [Amazon S3 Express One Zone](https://aws.amazon.com/s3/storage-classes/express-one-zone/)
 
 [AWS Cost Management and Billing](https://aws.amazon.com/aws-cost-management/)
-
