@@ -312,10 +312,10 @@ When fine-tuning BERT models at scale, selecting the appropriate AWS resources i
 ```bash
 # P5 Instance Types for BERT Fine-tuning
 Instance Type    | GPUs | GPU Memory | vCPUs | Memory  | Cost/Hour* | Best Use Case
-p5.48xlarge     | 8    | 640 GB     | 192   | 2048 GB | $98.32     | Large models, batch training
-p5.24xlarge     | 4    | 320 GB     | 96    | 1024 GB | $49.16     | Medium datasets
-p5.12xlarge     | 2    | 160 GB     | 48    | 512 GB  | $24.58     | Small-medium models
-p5.2xlarge      | 1    | 80 GB      | 12    | 128 GB  | $8.19      | Development, small datasets
+p5.48xlarge      | 8    | 640 GB     | 192   | 2048 GB | $98.32     | Large models, batch training
+p5.24xlarge      | 4    | 320 GB     | 96    | 1024 GB | $49.16     | Medium datasets
+p5.12xlarge      | 2    | 160 GB     | 48    | 512 GB  | $24.58     | Small-medium models
+p5.2xlarge       | 1    | 80 GB      | 12    | 128 GB  | $8.19      | Development, small datasets
 
 *Prices shown are approximate for us-east-1 region
 ```
@@ -329,8 +329,8 @@ p5.2xlarge      | 1    | 80 GB      | 12    | 128 GB  | $8.19      | Development
 ```bash
 # P4d Instance Recommendations
 Instance Type    | GPUs | GPU Memory | vCPUs | Memory  | Cost/Hour* | Recommended For
-p4d.24xlarge    | 8    | 320 GB     | 96    | 1152 GB | $32.77     | Multi-GPU training
-p4de.24xlarge   | 8    | 640 GB     | 96    | 1152 GB | $40.96     | Large context models
+p4d.24xlarge     | 8    | 320 GB     | 96    | 1152 GB | $32.77     | Multi-GPU training
+p4de.24xlarge    | 8    | 640 GB     | 96    | 1152 GB | $40.96     | Large context models
 ```
 
 **Amazon EC2 G5 instances** - *Cost-Effective GPU Instances*
@@ -349,9 +349,9 @@ p4de.24xlarge   | 8    | 640 GB     | 96    | 1152 GB | $40.96     | Large conte
 ```bash
 # Trainium Instance Options
 Instance Type    | Trainium | vCPUs | Memory  | Network  | Cost/Hour* | Use Case
-trn1.32xlarge   | 16       | 128   | 512 GB  | 800 Gbps | $21.50     | Large model training
-trn1n.32xlarge  | 16       | 128   | 512 GB  | 1600 Gbps| $24.78     | Network-intensive training
-trn1.2xlarge    | 1        | 8     | 32 GB   | 12.5 Gbps| $1.34      | Development, small models
+trn1.32xlarge    | 16       | 128   | 512 GB  | 800 Gbps | $21.50     | Large model training
+trn1n.32xlarge   | 16       | 128   | 512 GB  | 1600 Gbps| $24.78     | Network-intensive training
+trn1.2xlarge     | 1        | 8     | 32 GB   | 12.5 Gbps| $1.34      | Development, small models
 ```
 
 ### Resource estimation calculator
@@ -405,18 +405,18 @@ S3 Intelligent-Tiering| Variable access patterns   | $0.0125        | Automatic 
 ```bash
 # EBS Volume Types for ML Training
 Volume Type | IOPS      | Throughput    | Cost/GB/month* | Best For
-gp3        | 3,000-16K | 125-1000 MB/s | $0.08          | General training
-io2        | 100-64K   | 1000+ MB/s    | $0.125         | High IOPS training
-st1        | 500       | 500 MB/s      | $0.045         | Bulk data processing
+gp3         | 3,000-16K | 125-1000 MB/s | $0.08          | General training
+io2         | 100-64K   | 1000+ MB/s    | $0.125         | High IOPS training
+st1         | 500       | 500 MB/s      | $0.045         | Bulk data processing
 ```
 
 #### **Amazon FSx for Lustre - High-Performance File Storage**
 ```bash
 # FSx Lustre for Large-Scale Training
 Deployment Type    | Throughput/TiB | Cost/month/TiB* | Use Case
-Scratch           | 200 MB/s       | $140            | Temporary training
-Persistent SSD    | 250-1000 MB/s  | $240-600        | Long-term training
-Persistent HDD    | 40 MB/s        | $140            | Archive/backup
+Scratch            | 200 MB/s       | $140            | Temporary training
+Persistent SSD     | 250-1000 MB/s  | $240-600        | Long-term training
+Persistent HDD     | 40 MB/s        | $140            | Archive/backup
 ```
 
 ### Networking configuration
@@ -611,7 +611,7 @@ AutoScalingGroup:
 
 ### Best Practices for resource selection
 
-#### **DevOps Checklist for Amazon AWS resource allocation**
+#### **DevOps checklist for Amazon AWS resource allocation**
 
 **Pre-Training assessment**
 - Estimate dataset size and complexity
