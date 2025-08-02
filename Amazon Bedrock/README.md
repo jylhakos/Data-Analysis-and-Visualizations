@@ -43,7 +43,7 @@ graph TD
 
 ### Documentation
 
-This repository provides comprehensive documentation for both **local development** and **Amazon Bedrock cloud deployment**:
+The documentation covers for both **local development** and **Amazon Bedrock cloud deployment**:
 
 #### **Local Development & API Documentation**
 - **[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**: Complete local API reference
@@ -277,7 +277,7 @@ jobs:
 
 ### **Documentation**
 
-#### Comprehensive Documentation
+#### Documentation
 - **[docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)**: Local development API reference and troubleshooting
 - **[fine-tuning/README.md](./fine-tuning/README.md)**: Amazon Bedrock cloud integration guide
 - **[fine-tuning/RESOURCE_CALCULATOR.md](./fine-tuning/RESOURCE_CALCULATOR.md)**: AWS resource allocation calculator
@@ -296,7 +296,7 @@ This integration allows you to leverage Amazon Bedrock's managed infrastructure 
 
 ### Overview: Choosing the right Amazon AWS infrastructure
 
-When fine-tuning BERT models at scale, selecting the appropriate AWS resources is critical for balancing performance, cost, and efficiency. AWS offers a comprehensive range of compute, storage, and networking solutions optimized for ML workloads.
+When fine-tuning BERT models at scale, selecting the appropriate AWS resources is critical for balancing performance, cost, and efficiency. Amazon AWS offers various compute, storage, and networking solutions optimized for ML workloads.
 
 ### Amazon EC2 instance selection for ML training
 
