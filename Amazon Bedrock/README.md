@@ -672,6 +672,358 @@ Dataset: > 10 GB
 Use Case: Large-scale models, research, production at scale
 ```
 
+## Amazon EC2 Spot instances for cost optimization
+
+### What are Amazon AWS Spot instances?
+
+**Amazon EC2 Spot Instances** allow you to take advantage of unused EC2 capacity in the AWS cloud at up to **90% discount** compared to On-Demand prices. Spot Instances are ideal for workloads that are flexible about when they run and can be interrupted.
+
+### How Spot instances work?
+
+```mermaid
+graph TD
+    A[AWS Spare Capacity] -->|Available| B[Spot Instance Pool]
+    B -->|Bid Price ≥ Spot Price| C[Instance Launched]
+    C -->|Market Price Changes| D{Price Check}
+    D -->|Price Increases| E[2-Minute Warning]
+    D -->|Price Stable| F[Continue Running]
+    E -->|Save Work| G[Instance Terminated]
+    
+    style A fill:#ff9900,color:#ffffff
+    style C fill:#4CAF50,color:#ffffff
+    style E fill:#f44336,color:#ffffff
+```
+
+### Using Spot instances with Databricks
+
+**Databricks** integrates seamlessly with AWS Spot Instances to optimize costs for big data analytics and machine learning workloads, including BERT fine-tuning.
+
+#### **Databricks cluster configuration**
+
+```python
+# Databricks cluster configuration with Spot Instances
+cluster_config = {
+    "cluster_name": "bert-finetuning-spot-cluster",
+    "spark_version": "11.3.x-gpu-ml-scala2.12",
+    "node_type_id": "p3.2xlarge",  # GPU instances for ML workloads
+    "driver_node_type_id": "i3.xlarge",
+    "num_workers": 4,
+    
+    # Spot Instance configuration
+    "aws_attributes": {
+        "availability": "SPOT_WITH_FALLBACK",  # Use Spot with On-Demand fallback
+        "spot_bid_price_percent": 50,  # Bid up to 50% of On-Demand price
+        "first_on_demand": 1,  # Keep driver on On-Demand for stability
+        "zone_id": "us-east-1a"
+    },
+    
+    # Auto-scaling for cost optimization
+    "autoscale": {
+        "min_workers": 2,
+        "max_workers": 8
+    }
+}
+```
+
+#### **Cost savings examples**
+
+**BERT fine-tuning workload cost comparison:**
+```bash
+# On-Demand vs Spot Pricing for ML Workloads
+Instance Type    | On-Demand  | Spot Price | Savings | Use Case
+p3.2xlarge       | $3.06/hr   | $0.92/hr   | 70%     | BERT training
+p3.8xlarge       | $12.24/hr  | $3.67/hr   | 70%     | Large model training
+p4d.24xlarge     | $32.77/hr  | $9.83/hr   | 70%     | Distributed training
+g4dn.xlarge      | $0.526/hr  | $0.158/hr  | 70%     | Development/testing
+
+# Example: 24-hour BERT fine-tuning job
+On-Demand Cost: $3.06 × 24 = $73.44
+Spot Cost: $0.92 × 24 = $22.08
+Total Savings: $51.36 (70% reduction)
+```
+
+### Best Practices for Spot instances in ML workloads
+
+#### **1. Workload suitability**
+
+**✅ Ideal for Spot instances:**
+- **Development and testing**: Prototyping, experimentation
+- **Batch processing**: Large-scale data preprocessing
+- **Training jobs**: Model training that can be checkpointed
+- **Non-critical workloads**: Research, exploration
+
+**❌ Avoid Spot instances for:**
+- **Production inference**: Real-time serving requirements
+- **Critical timelines**: Time-sensitive training jobs
+- **Stateful applications**: Without proper checkpointing
+
+#### **2. Fault tolerant architecture**
+
+```python
+# Checkpointing strategy for BERT fine-tuning on Spot Instances
+import torch
+import os
+from transformers import BertForSequenceClassification, BertTokenizer
+
+class SpotInstanceTrainer:
+    def __init__(self, model_name, checkpoint_dir="./checkpoints"):
+        self.model = BertForSequenceClassification.from_pretrained(model_name)
+        self.tokenizer = BertTokenizer.from_pretrained(model_name)
+        self.checkpoint_dir = checkpoint_dir
+        
+    def save_checkpoint(self, epoch, loss, optimizer_state):
+        """Save training checkpoint for interruption recovery"""
+        checkpoint = {
+            'epoch': epoch,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': optimizer_state,
+            'loss': loss
+        }
+        
+        checkpoint_path = f"{self.checkpoint_dir}/checkpoint_epoch_{epoch}.pt"
+        torch.save(checkpoint, checkpoint_path)
+        
+        # Upload to S3 for persistence
+        self.upload_to_s3(checkpoint_path)
+        
+    def resume_from_checkpoint(self, checkpoint_path):
+        """Resume training from checkpoint after interruption"""
+        checkpoint = torch.load(checkpoint_path)
+        self.model.load_state_dict(checkpoint['model_state_dict'])
+        return checkpoint['epoch'], checkpoint['loss']
+        
+    def handle_interruption(self):
+        """Handle Spot Instance interruption gracefully"""
+        # Save current state
+        self.save_checkpoint(current_epoch, current_loss, optimizer.state_dict())
+        
+        # Clean up resources
+        torch.cuda.empty_cache()
+        
+        # Signal for restart on new instance
+        return "RESTART_REQUIRED"
+```
+
+#### **3. Databricks Spot instance configuration**
+
+**Mixed instance strategy:**
+```python
+# Optimal configuration for production workloads
+databricks_config = {
+    "aws_attributes": {
+        "availability": "SPOT_WITH_FALLBACK",
+        "spot_bid_price_percent": 60,  # Conservative bid
+        "first_on_demand": 1,  # Stable driver node
+        "zone_id": "auto"  # Let Databricks choose optimal AZ
+    },
+    
+    # Use multiple instance types for better availability
+    "instance_pool_id": "pool-spot-ml-instances",
+    "instance_types": [
+        "p3.2xlarge",
+        "p3.8xlarge", 
+        "g4dn.xlarge",
+        "g4dn.2xlarge"
+    ]
+}
+```
+
+#### **4. Monitoring and alerts**
+
+```python
+# CloudWatch monitoring for Spot Instance interruptions
+import boto3
+
+def setup_spot_monitoring():
+    cloudwatch = boto3.client('cloudwatch')
+    
+    # Create alarm for Spot Instance interruptions
+    cloudwatch.put_metric_alarm(
+        AlarmName='SpotInstanceInterruption',
+        ComparisonOperator='GreaterThanThreshold',
+        EvaluationPeriods=1,
+        MetricName='SpotInstanceTerminating',
+        Namespace='AWS/EC2',
+        Period=60,
+        Statistic='Sum',
+        Threshold=0.0,
+        ActionsEnabled=True,
+        AlarmActions=[
+            'arn:aws:sns:us-east-1:123456789012:spot-interruption-alert'
+        ],
+        AlarmDescription='Alert when Spot Instance is terminating'
+    )
+```
+
+### Integration with Amazon Bedrock
+
+#### **Hybrid approach for BERT fine-tuning**
+
+```python
+# Use Spot Instances for data preparation, Bedrock for training
+class HybridBERTTraining:
+    def __init__(self):
+        self.databricks_client = DatabricksClient()
+        self.bedrock_client = boto3.client('bedrock')
+        
+    def prepare_data_on_spot(self, raw_data_path):
+        """Use Spot Instances for cost-effective data preprocessing"""
+        cluster_config = {
+            "aws_attributes": {
+                "availability": "SPOT",
+                "spot_bid_price_percent": 40
+            },
+            "node_type_id": "r5.xlarge"  # Memory-optimized for data processing
+        }
+        
+        # Launch Spot cluster for data preparation
+        cluster_id = self.databricks_client.create_cluster(cluster_config)
+        
+        # Run data preprocessing job
+        job_result = self.databricks_client.run_job({
+            "cluster_id": cluster_id,
+            "spark_python_task": {
+                "python_file": "s3://my-bucket/preprocessing/bert_data_prep.py",
+                "parameters": [raw_data_path]
+            }
+        })
+        
+        return job_result['processed_data_path']
+    
+    def fine_tune_with_bedrock(self, processed_data_path):
+        """Use Bedrock for reliable, managed fine-tuning"""
+        return self.bedrock_client.create_fine_tuning_job(
+            training_data_path=processed_data_path,
+            model_name="bert-base-uncased"
+        )
+```
+
+### Cost optimization strategies
+
+#### **1. Bid strategy optimization**
+
+```python
+# Dynamic bidding based on historical prices
+def calculate_optimal_bid(instance_type, availability_zone):
+    ec2 = boto3.client('ec2')
+    
+    # Get historical Spot price data
+    response = ec2.describe_spot_price_history(
+        InstanceTypes=[instance_type],
+        AvailabilityZone=availability_zone,
+        MaxResults=168  # Last week
+    )
+    
+    prices = [float(item['SpotPrice']) for item in response['SpotPrices']]
+    
+    # Calculate optimal bid (90th percentile of historical prices)
+    optimal_bid = np.percentile(prices, 90)
+    
+    return {
+        'recommended_bid': optimal_bid,
+        'average_price': np.mean(prices),
+        'price_volatility': np.std(prices)
+    }
+```
+
+#### **2. Multi-AZ strategy**
+
+```python
+# Deploy across multiple Availability Zones for better availability
+multi_az_config = {
+    "cluster_name": "bert-training-multi-az",
+    "aws_attributes": {
+        "availability": "SPOT",
+        "zone_id": "auto",  # Databricks selects best AZ
+        "spot_bid_price_percent": 50
+    },
+    
+    # Enable cluster retry in different AZ if interrupted
+    "retry_policy": {
+        "max_retries": 3,
+        "retry_delay_seconds": 300
+    }
+}
+```
+
+### Real-World Use Cases
+
+#### **Case Study: Large-Scale BERT fine-tuning**
+
+**Scenario**: Fine-tuning BERT on 100GB dataset for sentiment analysis
+
+```bash
+# Traditional On-Demand Approach
+Instance: p3.8xlarge (8 workers × 24 hours)
+Cost: $12.24/hr × 8 × 24 = $2,350.08
+
+# Optimized Spot + Databricks Approach
+Instance: p3.8xlarge (Spot with 70% savings)
+Cost: $3.67/hr × 8 × 24 = $705.02
+Total Savings: $1,645.06 (70% reduction)
+
+# Additional benefits:
+- Automatic checkpointing and recovery
+- Auto-scaling based on workload
+- Integrated monitoring and logging
+```
+
+#### **An example**
+
+```python
+# Complete Spot Instance workflow for BERT fine-tuning
+class SpotBERTWorkflow:
+    def __init__(self):
+        self.databricks = DatabricksClient()
+        self.s3 = boto3.client('s3')
+        
+    def run_cost_optimized_training(self, dataset_path, model_config):
+        """Run BERT fine-tuning with maximum cost optimization"""
+        
+        # 1. Data preprocessing on cheap Spot instances
+        preprocessing_cluster = self.create_spot_cluster(
+            instance_type="r5.large",
+            worker_count=4,
+            bid_percentage=30
+        )
+        
+        # 2. Model training on GPU Spot instances with checkpointing
+        training_cluster = self.create_spot_cluster(
+            instance_type="p3.2xlarge",
+            worker_count=2,
+            bid_percentage=50,
+            enable_checkpointing=True
+        )
+        
+        # 3. Model evaluation on On-Demand for reliability
+        evaluation_cluster = self.create_on_demand_cluster(
+            instance_type="m5.xlarge",
+            worker_count=1
+        )
+        
+        # Execute workflow with fault tolerance
+        return self.execute_training_pipeline(
+            preprocessing_cluster,
+            training_cluster, 
+            evaluation_cluster,
+            model_config
+        )
+```
+
+### Spot instance vs other cost optimization methods
+
+```bash
+# Cost Optimization Comparison for BERT Fine-tuning
+Method                  | Cost Reduction | Complexity | Reliability | Best For
+Spot Instances          | 50-90%         | Medium     | Variable    | Development, batch jobs
+Reserved Instances      | 40-60%         | Low        | High        | Predictable workloads  
+Savings Plans           | 30-50%         | Low        | High        | Mixed workloads
+Right-sizing            | 20-40%         | Low        | High        | All workloads
+Auto-scaling            | 10-30%         | Medium     | High        | Variable workloads
+```
+
+**Recommendation**: Combine Spot instances with other methods for maximum savings while maintaining reliability.
+
 This resource allocation guide helps DevOps teams make decisions about AWS infrastructure for BERT fine-tuning, balancing performance requirements with cost optimization.
 
 ### References
@@ -699,6 +1051,8 @@ This resource allocation guide helps DevOps teams make decisions about AWS infra
 [AWS Machine Learning Infrastructure](https://aws.amazon.com/machine-learning/infrastructure/)
 
 [Amazon EC2 Instance Types for Machine Learning](https://aws.amazon.com/ec2/instance-types/#Accelerated_Computing)
+
+[Amazon EC2 Spot Instances](https://aws.amazon.com/ec2/spot/)
 
 [Amazon EC2 P5 Instances](https://aws.amazon.com/blogs/aws/new-amazon-ec2-p5-instances-powered-by-nvidia-h100-tensor-core-gpus-for-accelerating-generative-ai-and-hpc-applications/)
 

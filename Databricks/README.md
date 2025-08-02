@@ -642,6 +642,183 @@ mlflow.deploy("model_name", "production")
 - Cost tracking and alerts
 - Custom metrics and alarms
 
+## Amazon Spot instances with Databricks
+
+Amazon **Spot Instances** provide significant cost savings by utilizing spare AWS compute capacity at up to 90% discount compared to On-Demand prices. Databricks seamlessly integrates with Spot Instances to optimize costs for big data analytics and machine learning workloads.
+
+### How Databricks utilizes Spot instances?
+
+**Hybrid Cluster Configuration**: Databricks allows you to configure clusters with a mix of On-Demand and Spot Instances, or use entirely Spot Instances for cost-sensitive workloads.
+
+**Worker Node Optimization**: Spot Instances are typically used for worker nodes in Databricks clusters, while keeping driver nodes on On-Demand instances for stability.
+
+### Cost savings
+
+- **Up to 90% Cost Reduction**: Spot Instances can reduce compute costs dramatically
+- **Large-Scale Workloads**: Particularly effective for batch processing, ETL jobs, and training large ML models
+- **Non-Critical Workloads**: Ideal for development, testing, and fault-tolerant applications
+
+### Configuration in Databricks
+
+#### 1. **Cluster configuration**
+```yaml
+# Example cluster configuration with Spot Instances
+cluster_name: "bert-training-spot"
+driver_node_type_id: "i3.xlarge"          # On-Demand for stability
+node_type_id: "g4dn.xlarge"               # Spot Instance type
+min_workers: 1
+max_workers: 8
+spot_bid_price_percent: 50                # Bid 50% of On-Demand price
+enable_elastic_disk: true
+```
+
+#### 2. **Mixed instance policy**
+```yaml
+# Recommended configuration for production workloads
+instance_configuration:
+  driver:
+    instance_type: "i3.xlarge"
+    pricing: "ON_DEMAND"                  # Stable driver
+  workers:
+    instance_types: ["g4dn.xlarge", "g4dn.2xlarge"]
+    pricing: "SPOT"                       # Cost-effective workers
+    spot_bid_price_percent: 60
+    fallback_to_on_demand: true          # Fallback if Spot unavailable
+```
+
+### Best practices for Spot instances
+
+#### **1. Fault tolerant design**
+- **Checkpointing**: Regularly save model checkpoints during training
+- **Auto-Recovery**: Configure clusters to automatically replace interrupted instances
+- **Multiple AZs**: Distribute across Availability Zones for better availability
+
+#### **2. Workload**
+```python
+# Good for Spot Instances:
+- Batch processing jobs
+- ETL pipelines
+- Model training (with checkpointing)
+- Development and testing
+- Data exploration
+
+# Avoid for Spot Instances:
+- Real-time inference
+- Critical production services
+- Jobs without checkpointing
+- Time-sensitive workloads
+```
+
+#### **3. Spot instance management**
+- **Diversification**: Use multiple instance types (g4dn.xlarge, g4dn.2xlarge, p3.2xlarge)
+- **Bid Strategy**: Set competitive but reasonable bid prices (50-80% of On-Demand)
+- **Monitoring**: Track Spot Instance interruptions and adjust strategy
+
+### An example
+
+#### **Terraform configuration**
+```hcl
+resource "databricks_cluster" "bert_training_spot" {
+  cluster_name            = "bert-training-spot-cluster"
+  spark_version          = data.databricks_spark_version.ml.id
+  node_type_id           = "g4dn.xlarge"
+  driver_node_type_id    = "i3.xlarge"
+  num_workers            = 4
+  
+  aws_attributes {
+    instance_profile_arn    = aws_iam_instance_profile.databricks_instance_profile.arn
+    availability           = "SPOT_WITH_FALLBACK"
+    spot_bid_price_percent = 60
+    zone_id               = "auto"
+  }
+  
+  library {
+    pypi {
+      package = "transformers==4.30.0"
+    }
+  }
+}
+```
+
+#### **Cluster creation with Databricks CLI**
+```bash
+# Create Spot Instance cluster
+databricks clusters create --json-file cluster-config-spot.json
+
+# cluster-config-spot.json
+{
+  "cluster_name": "bert-spot-training",
+  "spark_version": "13.3.x-gpu-ml-scala2.12",
+  "node_type_id": "g4dn.xlarge",
+  "driver_node_type_id": "i3.xlarge",
+  "num_workers": 4,
+  "aws_attributes": {
+    "availability": "SPOT_WITH_FALLBACK",
+    "spot_bid_price_percent": 60,
+    "ebs_volume_type": "GENERAL_PURPOSE_SSD",
+    "ebs_volume_count": 1,
+    "ebs_volume_size": 100
+  }
+}
+```
+
+### Monitoring Spot instance usage
+
+#### **Cost tracking**
+- Monitor Spot Instance savings in AWS Cost Explorer
+- Set up CloudWatch alarms for unexpected cost increases
+- Use Databricks cluster usage metrics
+
+#### **Interruption handling**
+```python
+# Python code to handle Spot Instance interruptions
+import time
+import boto3
+
+def monitor_spot_interruption():
+    """Monitor for Spot Instance interruption warnings"""
+    try:
+        response = requests.get(
+            'http://169.254.169.254/latest/meta-data/spot/instance-action',
+            timeout=2
+        )
+        if response.status_code == 200:
+            print("Spot Instance interruption detected!")
+            # Save checkpoint and gracefully shutdown
+            save_model_checkpoint()
+            return True
+    except:
+        pass
+    return False
+
+# Include in training loop
+for epoch in range(num_epochs):
+    if monitor_spot_interruption():
+        break
+    # Continue training...
+```
+
+### Cost optimization
+
+#### **1. Right sizing**
+- Start with smaller instances and scale based on actual usage
+- Use Databricks autoscaling to optimize cluster size
+- Monitor CPU/GPU utilization metrics
+
+#### **2. Scheduling**
+- Run non-urgent jobs during off-peak hours
+- Use Databricks Jobs for automated scheduling
+- Leverage different AZ pricing patterns
+
+#### **3. Instance type selection**
+```bash
+# Cost-effective GPU instances for BERT training
+g4dn.xlarge    # Good for development/small models
+g4dn.2xlarge   # Balanced performance/cost
+g4dn.4xlarge   # Large models with memory requirements
+p3.2xlarge     # High-performance training (when available as Spot)
+```
+
 ## Troubleshooting
 
 ### Issues
