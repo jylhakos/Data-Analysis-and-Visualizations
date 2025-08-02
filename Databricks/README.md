@@ -2,7 +2,7 @@
 
 ![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Databricks/An_overview_of_generative_AI_capabilities_with_Databricks_and_AWS.png?raw=true)
 
-_Figure: An overview of generative AI capabilities with **Amazon AWS and Databricks**
+_Figure: An overview of generative AI capabilities with_ **Amazon AWS and Databricks**
 
 ## Use case: Fine-tuning a BERT model
 
