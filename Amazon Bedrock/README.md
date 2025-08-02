@@ -12,7 +12,7 @@ Model customization is the process of providing training data to a model in orde
 
 ## Amazon Bedrock BERT fine-tuning solution
 
-This repository now includes a **comprehensive solution** for fine-tuning BERT models using Amazon Bedrock, combining local development with cloud-scale managed infrastructure.
+This repository now includes a **solution** for fine-tuning BERT models using Amazon Bedrock, combining local development with cloud-scale managed infrastructure.
 
 ### Architecture
 
