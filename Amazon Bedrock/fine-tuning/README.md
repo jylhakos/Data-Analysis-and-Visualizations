@@ -1,10 +1,10 @@
-# Fine-tuning Transformer models in PyTorch with Amazon Bedrock Integration
+# Fine-tuning Transformer models in PyTorch with Amazon Bedrock
 
 This project demonstrates how to fine-tune pre-trained Transformer models like BERT for text classification using PyTorch, Hugging Face transformers library, and **Amazon Bedrock** for scalable cloud-based model customization.
 
-## New: Amazon Bedrock integration
+## Amazon Bedrock
 
-This project now supports **Amazon Bedrock** for managed, scalable fine-tuning of BERT models in the cloud. Amazon Bedrock provides:
+This project now supports **Amazon Bedrock** for managed, scalable fine-tuning of BERT models in the cloud.
 
 - **Managed Infrastructure**: No need to provision or manage compute resources
 - **Cost-effective**: Pay only for what you use with automatic scaling
