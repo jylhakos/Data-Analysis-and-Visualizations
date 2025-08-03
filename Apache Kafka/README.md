@@ -41,6 +41,7 @@ Topics are partitioned, showing that a topic is distributed across a number of "
 ![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Apache%20Kafka/kafka_event_streaming.png?raw=true)
 
 *Figure: The topic has four partitions P1 to P4. Two different producer clients are publishing new events to the topic by writing events over the network to the topic's partitions. Events with the same key (denoted by their color in the figure) are written to the same partition.*
+
 ### References
 
 [Apache Kafka](https://kafka.apache.org/)
