@@ -4,7 +4,7 @@ Amazon Redshift is based on open source PostgreSQL for analytical queries and is
 
 The core infrastructure component of an Amazon Redshift data warehouse is a cluster.
 
-![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Amazon%20Redshift/data_warehouse.png.png?raw=true)
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Amazon%20Redshift/data_warehouse.png?raw=true)
 
 *Figure: The components that make up the Amazon Redshift data warehouse architecture*
 
