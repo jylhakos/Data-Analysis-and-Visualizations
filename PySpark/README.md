@@ -526,3 +526,7 @@ The air traffic data comes from the Harvard Dataverse:
 ## License
 
 The air traffic data is public domain from the US Department of Transportation.
+
+### References
+
+[Program AWS Glue ETL scripts in PySpark](https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-python.html)

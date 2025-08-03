@@ -1,5 +1,9 @@
 # Amazon SageMaker
 
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Google%20Cloud%20Dataflow/real_time_ETL%20.png?raw=true)
+
+*Figure: Real-time ETL architecture*
+
 To use Amazon SageMaker for Large Language Model (LLM) inference, you'll deploy your LLM to a SageMaker endpoint using a container, like the Large Model Inference (LMI) container. 
 
 LMI container optimizes performance for LLMs, leveraging libraries like vLLM.

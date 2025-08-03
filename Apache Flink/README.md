@@ -8,6 +8,14 @@ What are event-driven applications?
 
 An event-driven application is a stateful application that ingest events from one or more event streams and reacts to incoming events by triggering computations, state updates, or external actions.
 
+In batch processing mode of operation to process a bounded data stream, you can choose to ingest the entire dataset before producing any results.
+
+In stream processing involves unbounded data streams where the input may never end, and so you are forced to continuously process the data as it arrives.
+
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Apache Flink/bounded-unbounded.png?raw=true)
+
+*Figure: processing bounded and unbounded data streams*
+
 ## Data ingestion (FastAPI, Kafka and Flink)
 
 ### FastAPI
