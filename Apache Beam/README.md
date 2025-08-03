@@ -1,7 +1,11 @@
 # Apache Beam
 
-![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Google%20Cloud%20Dataflow/real_time_ETL%20.png?raw=true)
+Apache Beam is an open-source programming model for defining and executing data processing pipelines.
 
-*Figure: Real-time ETL architecture*
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Apache%20Beam/apache_beam_pipeline.png?raw=true)
+
+*Figure: pipeline*
 
 ### References
+
+[Programming model for Apache Beam]()
