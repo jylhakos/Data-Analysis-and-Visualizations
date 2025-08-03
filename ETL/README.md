@@ -4,7 +4,37 @@ What is ETL (Extract Transform Load)?
 
 Extract, transform, and load (ETL) is the process of combining data from multiple sources into a repository called a data warehouse.
 
-Real-time processing of temperature data using ETL with MQTT, gRPC, AWS, and a React (Next.js) dashboard
+## How does ETL work?
+
+Extract, transform, and load (ETL) works by moving data from the source system to the destination system at periodic intervals. 
+
+The ETL process works in three steps.
+
+1. Extract the relevant data from the source database.
+
+2. Transform the data so that it is better suited for analytics.
+
+3. Load the data into the target database.
+
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/ETL/extract_transform_load.png?raw=true)
+
+*Figure: Extract, transform, and load (ETL)*
+
+## Example of an ETL pipeline on AWS
+
+**Extract**
+
+Data is extracted from various sources (e.g., operational databases, application logs) using AWS Glue crawlers or Kinesis streams.
+
+**Transform**
+
+AWS Glue jobs clean and transform the data (e.g., data type conversion, aggregation, filtering) and store it in a structured format in Amazon S3.
+
+**Load**
+
+The transformed data is then loaded from S3 into Amazon Redshift for analytical querying and reporting.
+
+## Real-time processing of temperature data using ETL with MQTT, gRPC, AWS, and a React (Next.js) dashboard
 
 The sensor data flows through MQTT to Kafka, where dedicated ETL microservices process and store it using gRPC for efficient internal communication. 
 
@@ -133,6 +163,10 @@ IAM Roles
 AWS Identity and Access Management (IAM) roles define fine-grained permissions for microservices to interact with other AWS services, adhering to the principle of least privilege.
 
 ### References
+
+What is ETL?
+
+https://aws.amazon.com/what-is/etl/
 
 Work with AWS Glue
 
