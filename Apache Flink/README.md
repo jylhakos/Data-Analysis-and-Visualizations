@@ -12,7 +12,7 @@ In batch processing mode of operation to process a bounded data stream, you can 
 
 In stream processing involves unbounded data streams where the input may never end, and so you are forced to continuously process the data as it arrives.
 
-![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Apache Flink/bounded-unbounded.png?raw=true)
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/Apache%20Flink/bounded-unbounded.png?raw=true)
 
 *Figure: processing bounded and unbounded data streams*
 
