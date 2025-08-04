@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package weather;
+
+import "google/protobuf/timestamp.proto";
+
+// Weather data message
+message WeatherData {
+    string station_id = 1;
+    double latitude = 2;
+    double longitude = 3;
+    double temperature = 4;
+    double humidity = 5;
+    double pressure = 6;
+    double wind_speed = 7;
+    double wind_direction = 8;
+    google.protobuf.Timestamp timestamp = 9;
+    map<string, string> metadata = 10;
+}
+
+// Batch of weather data
+message WeatherDataBatch {
+    repeated WeatherData data = 1;
+    int32 total_count = 2;
+}
+
+// Request for weather data
+message WeatherDataRequest {
+    string station_id = 1;
+    google.protobuf.Timestamp start_time = 2;
+    google.protobuf.Timestamp end_time = 3;
+    int32 limit = 4;
+}
+
+// Response for weather data
+message WeatherDataResponse {
+    WeatherDataBatch batch = 1;
+    bool success = 2;
+    string message = 3;
+}
+
+// Data ingestion request
+message IngestDataRequest {
+    WeatherData data = 1;
+}
+
+// Data ingestion response
+message IngestDataResponse {
+    bool success = 1;
+    string message = 2;
+    string record_id = 3;
+}
+
+// Health check messages
+message HealthCheckRequest {
+    string service = 1;
+}
+
+message HealthCheckResponse {
+    bool healthy = 1;
+    string status = 2;
+    map<string, string> details = 3;
+}
+
+// Data Ingestion Service
+service DataIngestionService {
+    rpc IngestWeatherData(IngestDataRequest) returns (IngestDataResponse);
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// ETL Processing Service
+service ETLProcessingService {
+    rpc ProcessWeatherData(WeatherDataBatch) returns (WeatherDataResponse);
+    rpc ValidateData(WeatherData) returns (IngestDataResponse);
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// Data Storage Service
+service DataStorageService {
+    rpc StoreWeatherData(WeatherDataBatch) returns (WeatherDataResponse);
+    rpc GetWeatherData(WeatherDataRequest) returns (WeatherDataResponse);
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}

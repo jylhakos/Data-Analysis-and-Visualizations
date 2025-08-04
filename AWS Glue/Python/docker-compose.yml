@@ -1,0 +1,206 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: weather_db
+      POSTGRES_USER: weather_user
+      POSTGRES_PASSWORD: weather_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weather_user -d weather_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MQTT Broker (Eclipse Mosquitto)
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h localhost -t test -m 'health check'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Data Ingestion Service
+  data-ingestion:
+    build:
+      context: .
+      dockerfile: Dockerfile.data-ingestion
+    environment:
+      - DATABASE_URL=postgresql://weather_user:weather_pass@postgres:5432/weather_db
+      - REDIS_URL=redis://redis:6379/0
+      - MQTT_BROKER_HOST=mosquitto
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50051
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "grpc_health_probe -addr=localhost:50051"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Enhanced ETL Processing Service with AWS Glue Integration
+  enhanced-etl-processing:
+    build:
+      context: .
+      dockerfile: Dockerfile.aws-glue
+    ports:
+      - "50054:50051"  # Different port to avoid conflicts
+    environment:
+      - DATABASE_URL=postgresql://weather_user:weather_pass@postgres:5432/weather_db
+      - REDIS_URL=redis://redis:6379/0
+      - AWS_REGION=us-east-1
+      - S3_BUCKET_NAME=weather-data-lake
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50051
+    volumes:
+      - ./aws_credentials:/root/.aws:ro  # Mount AWS credentials
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import grpc; print('gRPC service check')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Original ETL Processing Service (for comparison/fallback)
+  etl-processing:
+    build:
+      context: .
+      dockerfile: Dockerfile.etl-processing
+    environment:
+      - DATABASE_URL=postgresql://weather_user:weather_pass@postgres:5432/weather_db
+      - REDIS_URL=redis://redis:6379/0
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50052
+    ports:
+      - "50052:50052"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "grpc_health_probe -addr=localhost:50052"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Data Storage Service
+  data-storage:
+    build:
+      context: .
+      dockerfile: Dockerfile.data-storage
+    environment:
+      - DATABASE_URL=postgresql://weather_user:weather_pass@postgres:5432/weather_db
+      - REDIS_URL=redis://redis:6379/0
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50053
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+    ports:
+      - "50053:50053"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "grpc_health_probe -addr=localhost:50053"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.api-gateway
+    environment:
+      - DATABASE_URL=postgresql://weather_user:weather_pass@postgres:5432/weather_db
+      - REDIS_URL=redis://redis:6379/0
+      - GRPC_HOST=data-ingestion
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - data-ingestion
+      - etl-processing
+      - data-storage
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
