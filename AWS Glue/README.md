@@ -472,7 +472,7 @@ Step 3: Data Quality & Monitoring
 └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### 4. AWS Glue Job Configuration Matrix
+#### 4. AWS Glue job configuration matrix
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
@@ -481,36 +481,36 @@ Step 3: Data Quality & Monitoring
 
 Job Type: Batch ETL                      │  Job Type: Streaming ETL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Name: weather-batch-etl-job             │  Name: weather-streaming-etl-job
-Role: AWSGlueWeatherETLRole             │  Role: AWSGlueWeatherETLRole
-Type: glueetl                           │  Type: gluestreaming
-Workers: 5 × G.1X (4 vCPU, 16GB each)   │  Workers: 5 × G.1X (4 vCPU, 16GB each)
-Timeout: 48 hours                       │  Timeout: 48 hours (continuous)
-Retries: 1                              │  Retries: 0 (streaming)
-Glue Version: 4.0                       │  Glue Version: 4.0
-Language: Python 3                      │  Language: Python 3
-                                        │
-Features:                               │  Features:
-├─ Job Bookmarks: Enabled               │  ├─ Checkpointing: Enabled
-├─ CloudWatch Logs: Enabled             │  ├─ CloudWatch Logs: Enabled
-├─ Spark UI: Enabled                    │  ├─ Exactly-Once: Enabled
-├─ Metrics: Enabled                     │  ├─ Watermarks: 2 minutes
-├─ Auto Scaling: Enabled                │  ├─ Trigger: processingTime=30s
-└─ Cost Monitoring: Enabled             │  └─ Window: 10 minutes
-                                        │
-Triggers:                               │  Triggers:
-├─ Scheduled: Daily at 2:00 AM UTC      │  ├─ Continuous: Always running
-├─ S3 Event: New data arrival           │  ├─ Kinesis: Data stream events
-├─ Manual: On-demand execution          │  └─ Manual: Start/stop control
-└─ API: Programmatic triggers           │
-                                        │
-Arguments:                              │  Arguments:
-├─ --S3_BUCKET=weather-data-lake        │  ├─ --KINESIS_STREAM_NAME=weather-stream
-├─ --DATABASE_NAME=weather_analytics_db │  ├─ --S3_BUCKET=weather-data-lake
-├─ --START_DATE=auto                    │  ├─ --CHECKPOINT_LOCATION=s3://...
-├─ --END_DATE=auto                      │  ├─ --WINDOW_DURATION=10 minutes
-├─ --PROCESSING_TYPE=incremental        │  └─ --WATERMARK_DURATION=2 minutes
-└─ --QUALITY_THRESHOLD=95               │
+Name: weather-batch-etl-job              │  Name: weather-streaming-etl-job
+Role: AWSGlueWeatherETLRole              │  Role: AWSGlueWeatherETLRole
+Type: glueetl                            │  Type: gluestreaming
+Workers: 5 × G.1X (4 vCPU, 16GB each)    │  Workers: 5 × G.1X (4 vCPU, 16GB each)
+Timeout: 48 hours                        │  Timeout: 48 hours (continuous)
+Retries: 1                               │  Retries: 0 (streaming)
+Glue Version: 4.0                        │  Glue Version: 4.0
+Language: Python 3                       │  Language: Python 3
+                                         │
+Features:                                │  Features:
+├─ Job Bookmarks: Enabled                │  ├─ Checkpointing: Enabled
+├─ CloudWatch Logs: Enabled              │  ├─ CloudWatch Logs: Enabled
+├─ Spark UI: Enabled                     │  ├─ Exactly-Once: Enabled
+├─ Metrics: Enabled                      │  ├─ Watermarks: 2 minutes
+├─ Auto Scaling: Enabled                 │  ├─ Trigger: processingTime=30s
+└─ Cost Monitoring: Enabled              │  └─ Window: 10 minutes
+                                         │
+Triggers:                                │  Triggers:
+├─ Scheduled: Daily at 2:00 AM UTC       │  ├─ Continuous: Always running
+├─ S3 Event: New data arrival            │  ├─ Kinesis: Data stream events
+├─ Manual: On-demand execution           │  └─ Manual: Start/stop control
+└─ API: Programmatic triggers            │
+                                         │
+Arguments:                               │  Arguments:
+├─ --S3_BUCKET=weather-data-lake         │  ├─ --KINESIS_STREAM_NAME=weather-stream
+├─ --DATABASE_NAME=weather_analytics_db  │  ├─ --S3_BUCKET=weather-data-lake
+├─ --START_DATE=auto                     │  ├─ --CHECKPOINT_LOCATION=s3://...
+├─ --END_DATE=auto                       │  ├─ --WINDOW_DURATION=10 minutes
+├─ --PROCESSING_TYPE=incremental         │  └─ --WATERMARK_DURATION=2 minutes
+└─ --QUALITY_THRESHOLD=95                │
 ```
 
 #### Project Structure
@@ -734,7 +734,7 @@ aws glue get-table --database-name weather_analytics_db --name processed_weather
 │ │- Success    │ │    │ │             │ │    │ │  ┌─────────────┐ ┌────────────────┐ │ │
 │ │- Failure    │ │    │ │- DPU Usage  │ │    │ │  │ Job Status  │ │  Data Volume   │ │ │
 │ │- Duration   │ │    │ │- Duration   │ │    │ │  │             │ │                │ │ │
-│ │- DPU Hours  │ │    │ │- Success Rate│ │    │ │  │ ✅ Batch    │ │ 📊 1.2M records │ │
+│ │- DPU Hours  │ │    │ │- Success Rate │    │ │  │ ✅ Batch    │ │ 📊 1.2M records│ │ │
 │ └─────────────┘ │    │ └─────────────┘ │    │ │  │ 🔄 Streaming│ │ 📈 45GB proc.  │ │ │
 │                 │    │                 │    │ │  │ ❌ 0 Errors │ │ 💰 $12.50 cost │ │ │
 │ ┌─────────────┐ │    │ ┌─────────────┐ │    │ │  └─────────────┘ └────────────────┘ │ │
@@ -935,7 +935,7 @@ aws glue update-job --job-name weather-batch-etl-job \
     --job-update DefaultArguments='{"--job-bookmark-option":"job-bookmark-enable"}'
 ```
 
-#### Multi-Environment Deployment Architecture
+#### Multi-environment deployment architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
@@ -990,7 +990,7 @@ Deployment Pipeline:
 └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
 ```
 
-#### Integration Patterns & Data Flow
+#### Integration patterns & data flow
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
