@@ -1,4 +1,4 @@
-# Extract, Transform, Load  (ETL)
+# Extract, Transform, Load (ETL)
 
 **What is ETL (Extract Transform Load)?**
 
@@ -6,7 +6,7 @@ Extract, transform, and load (ETL) is the process of combining data from multipl
 
 **What is a data lakehouse?**
 
-![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/ETL/extract_transform_load.png?raw=true)
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/ETL/data_lakehouse.png?raw=true)
 
 *Figure: A data lakehouse*
 
