@@ -6,7 +6,7 @@
 
 **What is AWS Lake Formation?**
 
-AWS Lake Formation helps you govern, secure, and  share data for analytics and machine learning.
+AWS Lake Formation helps you governance, secure, and  share data for analytics and machine learning.
 
 AWS Lake Formation provides a relational database management system (RDBMS) permissions model to grant or revoke access to Data Catalog resources such as databases, tables, and columns with underlying data in Amazon S3.
 

@@ -1,8 +1,16 @@
 # Extract, Transform, Load  (ETL)
 
-What is ETL (Extract Transform Load)?
+**What is ETL (Extract Transform Load)?**
 
 Extract, transform, and load (ETL) is the process of combining data from multiple sources into a repository called a data warehouse.
+
+**What is a data lakehouse?**
+
+![alt text](https://github.com/jylhakos/Data-Analysis-and-Visualizations/blob/main/ETL/extract_transform_load.png?raw=true)
+
+*Figure: A data lakehouse*
+
+A data lakehouse is a data management system that combines the data lakes and data warehouses. At the ingestion layer, batch or streaming data arrives from a variety of sources and in a variety of formats.You convert raw format of files to Delta tables, indeed you can use the schema capabilities of Delta Lake to check for missing or unexpected data. You can use Unity Catalog to register tables according to your data governance model and required data isolation boundaries.
 
 ## How does ETL work?
 
