@@ -51,47 +51,44 @@ graph TB
 
 This repository contains examples and implementations for various data analysis and visualization technologies. Each folder represents a different technology or platform with practical examples and documentation.
 
-```mermaid
-graph TD
-    Root[Data-Analysis-and-Visualizations] --> AWS[AWS Services]
-    Root --> Apache[Apache Technologies]
-    Root --> Cloud[Cloud Platforms]
-    Root --> BI[Business Intelligence]
-    Root --> ETL[ETL & Processing]
-    
-    AWS --> Bedrock[Amazon Bedrock<br/>AI/ML Foundation Models]
-    AWS --> Firehose[Amazon Data Firehose<br/>Data Streaming & Delivery]
-    AWS --> Kinesis[Amazon Kinesis<br/>Real-time Data Streaming]
-    AWS --> Redshift[Amazon Redshift<br/>Data Warehousing]
-    AWS --> SageMaker[Amazon SageMaker<br/>ML Platform]
-    AWS --> Glue[AWS Glue<br/>ETL Service]
-    AWS --> LakeFormation[AWS Lake Formation<br/>Data Lake Management]
-    
-    Apache --> Airflow[Apache Airflow<br/>Workflow Orchestration]
-    Apache --> Beam[Apache Beam<br/>Batch & Stream Processing]
-    Apache --> Flink[Apache Flink<br/>Stream Processing]
-    Apache --> Iceberg[Apache Iceberg<br/>Table Format]
-    Apache --> Kafka[Apache Kafka<br/>Event Streaming]
-    Apache --> Spark[Apache Spark<br/>Big Data Processing]
-    
-    Cloud --> GBQ[Google BigQuery<br/>Data Warehouse]
-    Cloud --> GDataflow[Google Cloud Dataflow<br/>Stream Processing]
-    Cloud --> Databricks[Databricks<br/>Analytics Platform]
-    
-    BI --> PowerBI[Power BI<br/>Microsoft Analytics]
-    BI --> Tableau[Tableau<br/>Data Visualization]
-    BI --> Excel[Excel<br/>Spreadsheet Analysis]
-    
-    ETL --> ETLFolder[ETL<br/>Extract Transform Load]
-    ETL --> PySpark[PySpark<br/>Python API for Spark]
-    ETL --> Gradio[Gradio<br/>ML Interface Builder]
-    
-    style Root fill:#e3f2fd
-    style AWS fill:#fff3e0
-    style Apache fill:#e8f5e8
-    style Cloud fill:#f3e5f5
-    style BI fill:#fce4ec
-    style ETL fill:#f1f8e9
+### 📁 Project Structure
+
+```
+Data-Analysis-and-Visualizations/
+├── 📄 LICENSE
+├── 📄 README.md
+│
+├── 🔶 AWS Services
+│   ├── 📂 Amazon Bedrock/           # AI/ML Foundation Models & Generative AI
+│   ├── 📂 Amazon Data Firehose/     # Real-time Data Streaming & Delivery
+│   ├── 📂 Amazon Kinesis/           # Real-time Data Stream Processing
+│   ├── 📂 Amazon Redshift/          # Data Warehousing & Analytics
+│   ├── 📂 Amazon SageMaker/         # Machine Learning Platform
+│   ├── 📂 AWS Glue/                 # Serverless ETL & Data Integration
+│   └── 📂 AWS Lake Formation/       # Data Lake Management & Security
+│
+├── 🟢 Apache Technologies
+│   ├── 📂 Apache Airflow/           # Workflow Orchestration & Pipeline Management
+│   ├── 📂 Apache Beam/              # Batch & Stream Processing Framework
+│   ├── 📂 Apache Flink/             # Distributed Stream Processing Engine
+│   ├── 📂 Apache Iceberg/           # Open Table Format for Large Datasets
+│   ├── 📂 Apache Kafka/             # Distributed Event Streaming Platform
+│   └── 📂 Apache Spark/             # Unified Analytics Engine for Big Data
+│
+├── 🔵 Cloud Platforms
+│   ├── 📂 Databricks/               # Unified Analytics Platform (Spark-based)
+│   ├── 📂 Google BigQuery/          # Serverless Data Warehouse
+│   └── 📂 Google Cloud Dataflow/    # Stream & Batch Processing Service
+│
+├── 🟣 Business Intelligence & Visualization
+│   ├── 📂 Excel/                    # Microsoft Excel Data Analysis
+│   ├── 📂 PowerBI/                  # Microsoft Business Analytics Platform
+│   └── 📂 Tableau/                  # Data Visualization & BI Platform
+│
+├── 🟡 ETL & Data Processing
+│   ├── 📂 ETL/                      # Extract, Transform, Load Examples
+│   ├── 📂 PySpark/                  # Python API for Apache Spark
+│   └── 📂 Gradio/                   # ML Interface & App Builder
 ```
 
 
